@@ -2,7 +2,7 @@
 
 > A gamified SQL challenge platform showcasing real-world SQL proficiency across 6 difficulty tiers.
 
-**Live Demo:** [your-github-SamOliverAreh.github.io/sql-gamehub](https://github.com)
+**Live Demo:** [https://samoliverareh.github.io/sql-gamehub/index.html](https://github.com)
 
 ---
 
