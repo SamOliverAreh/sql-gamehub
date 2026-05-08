@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — QueryQuest</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body { padding-top: 80px; }
+    .page-layout { max-width: 900px; margin: 0 auto; padding: 60px 24px; position: relative; z-index: 1; }
+    .about-hero { text-align: center; padding: 40px 0 60px; }
+    .about-hero h1 { font-size: 2.2rem; margin-bottom: 16px; }
+    .about-hero p { color: var(--text-muted); font-size: 1rem; max-width: 600px; margin: 0 auto; line-height: 1.7; }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 60px; }
+    @media (max-width: 600px) { .about-grid { grid-template-columns: 1fr; } }
+    .about-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; }
+    .about-card h3 { font-size: 0.95rem; margin-bottom: 10px; color: var(--accent); }
+    .about-card p, .about-card li { font-size: 0.85rem; color: var(--text-muted); line-height: 1.7; }
+    .about-card ul { list-style: none; padding: 0; }
+    .about-card li::before { content: '▸ '; color: var(--accent); }
+    .tech-stack { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .tech-tag { font-family: var(--font-mono); font-size: 0.72rem; padding: 5px 12px; background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2); color: var(--accent); border-radius: 6px; }
+    .sql-showcase { margin: 60px 0; }
+    .sql-showcase h2 { text-align: center; font-size: 1.5rem; margin-bottom: 8px; }
+    .sql-showcase-sub { text-align: center; color: var(--text-muted); font-size: 0.88rem; margin-bottom: 40px; }
+    .concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .concept-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .concept-icon { font-size: 1.2rem; margin-bottom: 8px; }
+    .concept-name { font-family: var(--font-display); font-size: 0.78rem; color: var(--accent); margin-bottom: 6px; }
+    .concept-desc { font-size: 0.78rem; color: var(--text-muted); }
+    .cta-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 48px; text-align: center; margin-top: 60px; }
+    .cta-section h2 { font-size: 1.5rem; margin-bottom: 12px; }
+    .cta-section p { color: var(--text-muted); margin-bottom: 28px; }
+    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="scanline"></div>
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-logo"><span>⬡</span><span class="logo-text">QueryQuest</span></a>
+    <div class="nav-links">
+      <a href="challenges.html">Challenges</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="about.html" style="color:var(--accent)">About</a>
+    </div>
+    <div class="nav-auth">
+      <a href="login.html" class="btn-ghost">Login</a>
+      <a href="register.html" class="btn-primary">Play Now</a>
+    </div>
+  </nav>
+
+  <div class="page-layout">
+    <div class="about-hero">
+      <h1>Built to <span class="accent">Prove</span> SQL Mastery</h1>
+      <p>
+        QueryQuest is a portfolio project demonstrating deep SQL proficiency — from foundational
+        SELECT statements to advanced window functions and recursive CTEs. Every challenge is
+        hand-crafted with real datasets and a live in-browser SQL engine.
+      </p>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-card">
+        <h3>🎯 Project Goals</h3>
+        <ul>
+          <li>Demonstrate SQL mastery across all skill levels</li>
+          <li>Build a fully functional gamified learning platform</li>
+          <li>Showcase frontend development with vanilla JS</li>
+          <li>Implement real SQL execution using SQL.js (SQLite)</li>
+          <li>Design a complete user progress & XP system</li>
+        </ul>
+      </div>
+      <div class="about-card">
+        <h3>🔧 Tech Stack</h3>
+        <p>Built entirely with web fundamentals — no frameworks, no build tools. Pure HTML, CSS, and JavaScript.</p>
+        <div class="tech-stack">
+          <span class="tech-tag">HTML5</span>
+          <span class="tech-tag">CSS3</span>
+          <span class="tech-tag">Vanilla JS</span>
+          <span class="tech-tag">SQL.js</span>
+          <span class="tech-tag">CodeMirror</span>
+          <span class="tech-tag">SQLite</span>
+          <span class="tech-tag">LocalStorage</span>
+        </div>
+      </div>
+      <div class="about-card">
+        <h3>📊 SQL Coverage</h3>
+        <ul>
+          <li>Basic queries (SELECT, WHERE, ORDER BY)</li>
+          <li>Aggregation (GROUP BY, HAVING, COUNT/SUM/AVG)</li>
+          <li>JOINs (INNER, LEFT, RIGHT, FULL OUTER)</li>
+          <li>Subqueries and correlated subqueries</li>
+          <li>CTEs and recursive CTEs</li>
+          <li>Window functions (RANK, ROW_NUMBER, SUM OVER)</li>
+        </ul>
+      </div>
+      <div class="about-card">
+        <h3>🏗️ Architecture</h3>
+        <ul>
+          <li>Static site — deployable to GitHub Pages</li>
+          <li>SQL.js runs a real SQLite engine in-browser</li>
+          <li>User data persisted with localStorage</li>
+          <li>Modular challenge data in <code style="font-family:var(--font-mono);font-size:0.8em;color:var(--accent)">data/challenges.js</code></li>
+          <li>Shared utilities in <code style="font-family:var(--font-mono);font-size:0.8em;color:var(--accent)">js/main.js</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SQL Concepts Showcase -->
+    <div class="sql-showcase">
+      <h2>SQL Concepts Covered</h2>
+      <p class="sql-showcase-sub">Every challenge maps to a core SQL concept — demonstrating breadth and depth of knowledge.</p>
+      <div class="concept-grid">
+        <div class="concept-card"><div class="concept-icon">📋</div><div class="concept-name">SELECT & Filtering</div><div class="concept-desc">WHERE, BETWEEN, IN, LIKE, IS NULL</div></div>
+        <div class="concept-card"><div class="concept-icon">📊</div><div class="concept-name">Aggregation</div><div class="concept-desc">COUNT, SUM, AVG, MIN, MAX</div></div>
+        <div class="concept-card"><div class="concept-icon">🗂️</div><div class="concept-name">Grouping</div><div class="concept-desc">GROUP BY with HAVING clauses</div></div>
+        <div class="concept-card"><div class="concept-icon">🔗</div><div class="concept-name">JOINs</div><div class="concept-desc">INNER, LEFT, RIGHT, FULL OUTER, CROSS</div></div>
+        <div class="concept-card"><div class="concept-icon">🔄</div><div class="concept-name">Subqueries</div><div class="concept-desc">Correlated & non-correlated subqueries</div></div>
+        <div class="concept-card"><div class="concept-icon">🧱</div><div class="concept-name">CTEs</div><div class="concept-desc">Common Table Expressions with WITH</div></div>
+        <div class="concept-card"><div class="concept-icon">🪟</div><div class="concept-name">Window Functions</div><div class="concept-desc">RANK, DENSE_RANK, ROW_NUMBER, OVER()</div></div>
+        <div class="concept-card"><div class="concept-icon">🌀</div><div class="concept-name">Recursive CTEs</div><div class="concept-desc">Hierarchical data traversal</div></div>
+        <div class="concept-card"><div class="concept-icon">📈</div><div class="concept-name">Running Totals</div><div class="concept-desc">Cumulative sums with ROWS PRECEDING</div></div>
+        <div class="concept-card"><div class="concept-icon">🔢</div><div class="concept-name">String Functions</div><div class="concept-desc">UPPER, LOWER, SUBSTR, LENGTH</div></div>
+        <div class="concept-card"><div class="concept-icon">📅</div><div class="concept-name">Date Functions</div><div class="concept-desc">Temporal filtering and formatting</div></div>
+        <div class="concept-card"><div class="concept-icon">⚡</div><div class="concept-name">Set Operations</div><div class="concept-desc">UNION, INTERSECT, EXCEPT</div></div>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <h2>Ready to Test Your SQL?</h2>
+      <p>Start with Rookie challenges or jump straight into Advanced queries — the choice is yours.</p>
+      <div class="cta-btns">
+        <a href="register.html" class="btn-primary">Create Account →</a>
+        <a href="challenges.html" class="btn-ghost">Browse Challenges</a>
+        <a href="https://github.com" target="_blank" class="btn-ghost">View on GitHub</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-logo">⬡ QueryQuest</div>
+    <p class="footer-sub">SQL Portfolio Project · Demonstrating Data Engineering & Analytics Proficiency</p>
+  </footer>
+</body>
+</html>
