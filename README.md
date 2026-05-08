@@ -2,7 +2,7 @@
 
 > A gamified SQL challenge platform showcasing real-world SQL proficiency across 6 difficulty tiers.
 
-**Live Demo:** [Master SQL.Compete. Win.](https://samoliverareh.github.io/sql-gamehub/index.html)
+**Live Demo:** [Master SQL. Compete. Win.](https://samoliverareh.github.io/sql-gamehub/index.html)
 
 ---
 
@@ -71,7 +71,7 @@ sql-gamehub/
 2. Push to your GitHub account
 3. Go to **Settings → Pages**
 4. Set Source to **Deploy from branch: main / root**
-5. Your site will be live at `https://SamOliveAreh.github.io/sql-gamehub/`
+5. Your site will be live at `https://your.username.github.io/sql-gamehub/index.html`
 
 No build step. No dependencies. Pure HTML/CSS/JS.
 
