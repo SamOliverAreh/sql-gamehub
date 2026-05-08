@@ -1,0 +1,17 @@
+# Dependency dirs
+node_modules/
+.npm/
+
+# OS files
+.DS_Store
+Thumbs.db
+.env
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
