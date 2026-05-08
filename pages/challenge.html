@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Challenge — QueryQuest</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- CodeMirror for syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"/>
+  <style>
+    body { padding-top: 80px; }
+    .challenge-layout { max-width: 1200px; margin: 0 auto; padding: 40px 24px; display: grid; grid-template-columns: 380px 1fr; gap: 24px; position: relative; z-index: 1; }
+    @media (max-width: 900px) { .challenge-layout { grid-template-columns: 1fr; } }
+
+    /* LEFT PANEL */
+    .left-panel {}
+    .challenge-meta { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 16px; }
+    .ch-nav { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); margin-bottom: 20px; }
+    .ch-nav a { color: var(--text-muted); text-decoration: none; }
+    .ch-nav a:hover { color: var(--accent); }
+    .ch-tier-badge { margin-bottom: 12px; }
+    .ch-title { font-size: 1.3rem; margin-bottom: 12px; }
+    .ch-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
+    .ch-xp-row { display: flex; align-items: center; gap: 12px; }
+    .xp-pill { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--accent3); font-family: var(--font-mono); font-size: 0.72rem; padding: 4px 12px; border-radius: 99px; }
+    .hint-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .hint-toggle { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+    .hint-content { margin-top: 12px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; display: none; }
+    .hint-content.show { display: block; }
+    .schema-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .schema-title { font-family: var(--font-display); font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 12px; }
+    .schema-code { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); line-height: 1.8; background: var(--bg-secondary); padding: 12px; border-radius: 8px; overflow-x: auto; white-space: pre; }
+    .concepts-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+    /* RIGHT PANEL */
+    .right-panel { display: flex; flex-direction: column; gap: 16px; }
+    .editor-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .editor-topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+    .editor-title { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }
+    .editor-actions { display: flex; gap: 8px; }
+    .CodeMirror { height: 220px !important; font-size: 0.88rem !important; background: var(--bg-card) !important; }
+    .CodeMirror-scroll { background: var(--bg-card) !important; }
+    .run-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg-secondary); }
+    .run-hint { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); }
+    .btn-run { background: var(--accent3); color: var(--bg-primary); font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; padding: 10px 24px; border-radius: var(--radius); border: none; cursor: pointer; letter-spacing: 0.08em; transition: var(--transition); }
+    .btn-run:hover { background: #34d399; box-shadow: 0 0 20px rgba(16,185,129,0.4); }
+
+    /* RESULTS */
+    .results-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .results-topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+    .results-title { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }
+    .results-body { padding: 16px; min-height: 150px; overflow-x: auto; }
+    .results-placeholder { display: flex; align-items: center; justify-content: center; height: 120px; color: var(--text-dim); font-family: var(--font-mono); font-size: 0.82rem; }
+    .error-output { color: var(--danger); font-family: var(--font-mono); font-size: 0.82rem; padding: 8px; background: rgba(239,68,68,0.08); border-radius: 8px; }
+    .exec-time { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim); }
+
+    /* SUCCESS MODAL */
+    .success-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(5,8,16,0.92); backdrop-filter: blur(8px);
+      z-index: 300; align-items: center; justify-content: center;
+    }
+    .success-overlay.show { display: flex; }
+    .success-card {
+      background: var(--bg-card); border: 1px solid var(--accent3);
+      border-radius: 20px; padding: 48px; max-width: 440px; width: 90%;
+      text-align: center; box-shadow: 0 0 60px rgba(16,185,129,0.3);
+      animation: fadeInUp 0.3s ease;
+    }
+    .success-icon { font-size: 3.5rem; margin-bottom: 16px; }
+    .success-title { font-size: 1.5rem; color: var(--accent3); margin-bottom: 8px; }
+    .success-xp { font-family: var(--font-display); font-size: 2rem; color: var(--accent); margin: 16px 0; }
+    .success-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+    .prev-next-nav { display: flex; gap: 12px; }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="scanline"></div>
+
+  <nav class="navbar">
+    <a href="../index.html" class="nav-logo"><span>⬡</span><span class="logo-text">QueryQuest</span></a>
+    <div class="nav-links">
+      <a href="challenges.html">Challenges</a>
+      <a href="leaderboard.html">Leaderboard</a>
+    </div>
+    <div class="nav-auth" id="navAuth">
+      <a href="login.html" class="btn-ghost">Login</a>
+      <a href="register.html" class="btn-primary">Register</a>
+    </div>
+  </nav>
+
+  <div class="challenge-layout">
+    <!-- LEFT: Info Panel -->
+    <div class="left-panel">
+      <div class="challenge-meta">
+        <div class="ch-nav">
+          <a href="challenges.html">Challenges</a> / <span id="chTierNav">...</span>
+        </div>
+        <div class="ch-tier-badge" id="chTierBadge"></div>
+        <h1 class="ch-title" id="chTitle">Loading...</h1>
+        <p class="ch-desc" id="chDesc"></p>
+        <div class="ch-xp-row">
+          <span class="xp-pill" id="chXP"></span>
+          <span id="solvedBadge"></span>
+        </div>
+        <div class="concepts-list" id="chConcepts" style="margin-top:16px;"></div>
+      </div>
+
+      <div class="hint-box">
+        <div class="hint-toggle" onclick="toggleHint()">
+          💡 Show Hint <span id="hintArrow">▼</span>
+        </div>
+        <div class="hint-content" id="hintContent"></div>
+      </div>
+
+      <div class="schema-box">
+        <div class="schema-title">DATABASE SCHEMA</div>
+        <div class="schema-code" id="schemaDisplay"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Editor + Results -->
+    <div class="right-panel">
+      <!-- Editor -->
+      <div class="editor-card">
+        <div class="editor-topbar">
+          <span class="editor-title">📝 SQL Editor</span>
+          <div class="editor-actions">
+            <button class="btn-ghost" style="padding:6px 14px;font-size:0.72rem;" onclick="clearEditor()">Clear</button>
+            <button class="btn-ghost" style="padding:6px 14px;font-size:0.72rem;" onclick="showSolution()">Solution</button>
+          </div>
+        </div>
+        <textarea id="sqlEditor">-- Write your SQL query here
+SELECT </textarea>
+        <div class="run-bar">
+          <span class="run-hint">Ctrl+Enter to run</span>
+          <button class="btn-run" onclick="runQuery()">▶ Run Query</button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="results-card">
+        <div class="results-topbar">
+          <span class="results-title" id="resultsTitle">RESULTS</span>
+          <span class="exec-time" id="execTime"></span>
+        </div>
+        <div class="results-body" id="resultsBody">
+          <div class="results-placeholder">Run your query to see results here.</div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <a href="challenges.html" class="btn-ghost">← All Challenges</a>
+        <div class="prev-next-nav">
+          <button class="btn-ghost" id="prevBtn" onclick="navigate(-1)">← Prev</button>
+          <button class="btn-ghost" id="nextBtn" onclick="navigate(1)">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-card">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Challenge Complete!</div>
+      <div class="success-xp" id="successXP">+0 XP</div>
+      <p style="color:var(--text-muted);font-size:0.88rem;" id="successMsg">Your query was correct.</p>
+      <div class="success-actions">
+        <button class="btn-ghost" onclick="closeSuccess()">Stay Here</button>
+        <button class="btn-primary" onclick="nextChallenge()">Next Challenge →</button>
+        <a href="challenges.html" class="btn-ghost">All Challenges</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../data/challenges.js"></script>
+  <script>
+    let db = null;
+    let currentChallenge = null;
+    let editor = null;
+    let sqlJS = null;
+
+    // Init CodeMirror
+    editor = CodeMirror.fromTextArea(document.getElementById('sqlEditor'), {
+      mode: 'text/x-sql',
+      theme: 'dracula',
+      lineNumbers: true,
+      matchBrackets: true,
+      indentWithTabs: false,
+      tabSize: 2,
+      extraKeys: { 'Ctrl-Enter': runQuery, 'Cmd-Enter': runQuery }
+    });
+
+    // Load challenge
+    const params = new URLSearchParams(window.location.search);
+    const challengeId = params.get('id');
+    currentChallenge = CHALLENGES_DATA.find(c => c.id === challengeId) || CHALLENGES_DATA[0];
+
+    function loadChallenge(ch) {
+      currentChallenge = ch;
+      document.getElementById('chTierNav').textContent = ch.tierName;
+      document.getElementById('chTierBadge').innerHTML = `<span class="badge badge-${ch.tierName.toLowerCase()}">${ch.tierName}</span>`;
+      document.getElementById('chTitle').textContent = ch.title;
+      document.getElementById('chDesc').textContent = ch.description;
+      document.getElementById('chXP').textContent = `+${ch.xp} XP`;
+      document.getElementById('hintContent').textContent = ch.hint;
+      document.title = ch.title + ' — QueryQuest';
+
+      // Schema display (extract table names and cols)
+      document.getElementById('schemaDisplay').textContent = ch.schema.replace(/CREATE TABLE/g, 'CREATE TABLE').trim();
+
+      // Concepts
+      const c = document.getElementById('chConcepts');
+      c.innerHTML = ch.concepts.map(t => `<span style="font-family:var(--font-mono);font-size:0.68rem;padding:3px 9px;border-radius:4px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);color:var(--accent);">${t}</span>`).join('');
+
+      // Solved?
+      const solved = QQ.isSolved(ch.id);
+      document.getElementById('solvedBadge').innerHTML = solved ? '<span class="badge badge-rookie">✓ Solved</span>' : '';
+
+      // Nav buttons
+      const idx = CHALLENGES_DATA.indexOf(ch);
+      document.getElementById('prevBtn').disabled = idx === 0;
+      document.getElementById('nextBtn').disabled = idx === CHALLENGES_DATA.length - 1;
+
+      // Reset results
+      document.getElementById('resultsBody').innerHTML = '<div class="results-placeholder">Run your query to see results here.</div>';
+      document.getElementById('execTime').textContent = '';
+
+      // Init DB
+      initDB(ch);
+    }
+
+    // Init SQL.js
+    async function initDB(ch) {
+      try {
+        if (!sqlJS) {
+          sqlJS = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` });
+        }
+        db = new sqlJS.Database();
+        db.run(ch.schema);
+        db.run(ch.seed);
+      } catch(e) {
+        console.error('DB init error:', e);
+      }
+    }
+
+    function runQuery() {
+      if (!db) { showError('Database not ready. Please wait...'); return; }
+      const query = editor.getValue().trim();
+      if (!query) return;
+
+      const start = Date.now();
+      try {
+        const results = db.exec(query);
+        const elapsed = Date.now() - start;
+        document.getElementById('execTime').textContent = `Executed in ${elapsed}ms`;
+
+        if (results.length === 0) {
+          document.getElementById('resultsBody').innerHTML = '<div class="results-placeholder" style="color:var(--accent3);">✓ Query executed. No rows returned.</div>';
+          return;
+        }
+
+        const { columns, values } = results[0];
+        renderTable(columns, values);
+
+        // Validate
+        const rows = values.map(row => {
+          const obj = {};
+          columns.forEach((col, i) => obj[col] = row[i]);
+          return obj;
+        });
+
+        if (currentChallenge.validate(rows, columns)) {
+          handleSuccess(rows, columns);
+        }
+
+      } catch(e) {
+        showError(e.message);
+        document.getElementById('execTime').textContent = '';
+      }
+    }
+
+    function renderTable(columns, values) {
+      let html = '<table class="result-table"><thead><tr>';
+      columns.forEach(col => html += `<th>${col}</th>`);
+      html += '</tr></thead><tbody>';
+      values.forEach(row => {
+        html += '<tr>';
+        row.forEach(cell => html += `<td>${cell === null ? '<em style="color:var(--text-dim)">NULL</em>' : cell}</td>`);
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      html += `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);margin-top:8px;">${values.length} row${values.length !== 1 ? 's' : ''} returned</div>`;
+
+      document.getElementById('resultsTitle').textContent = '✓ RESULTS';
+      document.getElementById('resultsBody').innerHTML = html;
+    }
+
+    function showError(msg) {
+      document.getElementById('resultsTitle').textContent = '✗ ERROR';
+      document.getElementById('resultsBody').innerHTML = `<div class="error-output">Error: ${msg}</div>`;
+    }
+
+    function handleSuccess(rows, cols) {
+      const alreadySolved = QQ.isSolved(currentChallenge.id);
+      if (!alreadySolved) {
+        QQ.saveProgress(currentChallenge.id, { solved: true });
+        const user = QQ.getUser();
+        if (user) {
+          QQ.addXP(currentChallenge.xp);
+          document.getElementById('solvedBadge').innerHTML = '<span class="badge badge-rookie">✓ Solved</span>';
+        }
+      }
+      document.getElementById('successXP').textContent = alreadySolved ? 'Already solved!' : `+${currentChallenge.xp} XP`;
+      document.getElementById('successMsg').textContent = alreadySolved
+        ? `Great work! You've already solved this one.`
+        : `Expected: ${currentChallenge.expectedNote}`;
+      document.getElementById('successOverlay').classList.add('show');
+    }
+
+    function closeSuccess() {
+      document.getElementById('successOverlay').classList.remove('show');
+    }
+
+    function nextChallenge() {
+      closeSuccess();
+      navigate(1);
+    }
+
+    function navigate(dir) {
+      const idx = CHALLENGES_DATA.indexOf(currentChallenge);
+      const next = CHALLENGES_DATA[idx + dir];
+      if (next) {
+        window.location.href = 'challenge.html?id=' + next.id;
+      }
+    }
+
+    function toggleHint() {
+      const content = document.getElementById('hintContent');
+      const arrow = document.getElementById('hintArrow');
+      content.classList.toggle('show');
+      arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+    }
+
+    function clearEditor() {
+      editor.setValue('-- Write your SQL query here\nSELECT ');
+      editor.focus();
+    }
+
+    function showSolution() {
+      if (confirm('Show the solution? This will replace your current query.')) {
+        editor.setValue(currentChallenge.solutionQuery.trim());
+      }
+    }
+
+    // Nav
+    const user = QQ.getUser();
+    const navAuth = document.getElementById('navAuth');
+    if (user) {
+      navAuth.innerHTML = `
+        <span style="font-family:var(--font-mono);font-size:0.8rem;color:var(--accent);margin-right:12px;">⚡ ${user.xp||0} XP</span>
+        <a href="dashboard.html" class="btn-ghost">Dashboard</a>
+      `;
+    }
+
+    // Load
+    loadChallenge(currentChallenge);
+  </script>
+</body>
+</html>
