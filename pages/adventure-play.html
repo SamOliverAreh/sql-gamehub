@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adventure — QueryQuest</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"/>
+  <style>
+    body { padding-top: 70px; }
+    .adv-layout { max-width: 1200px; margin: 0 auto; padding: 32px 16px; display: grid; grid-template-columns: 380px 1fr; gap: 20px; position: relative; z-index: 1; }
+
+    /* LEFT */
+    .story-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+    .story-card-header { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+    .story-card-body { padding: 20px; }
+    .story-mode-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 6px; }
+    .story-title { font-family: var(--font-display); font-size: 1rem; margin-bottom: 0; }
+    .story-narrative { font-size: 0.86rem; color: var(--text-muted); line-height: 1.8; padding-left: 12px; border-left: 3px solid var(--accent2); font-style: italic; margin-bottom: 16px; }
+    .story-objective-box { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+    .obj-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .obj-text { font-size: 0.84rem; color: var(--text-primary); line-height: 1.6; }
+    .hint-toggle { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: none; border: none; width: 100%; padding: 0; }
+    .hint-body { margin-top: 10px; font-size: 0.82rem; color: var(--text-muted); display: none; line-height: 1.6; }
+    .hint-body.show { display: block; }
+    .schema-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; }
+    .schema-code { font-family: var(--font-mono); font-size: 0.73rem; color: var(--accent); background: var(--bg-secondary); padding: 12px; border-radius: 8px; overflow-x: auto; white-space: pre; line-height: 1.7; border: 1px solid var(--border); }
+    .concept-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .concept-tags span { font-family: var(--font-mono); font-size: 0.62rem; padding: 3px 8px; border-radius: 4px; background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.18); color: var(--accent); }
+    .xp-reward { font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent3); margin-top: 12px; }
+
+    /* RIGHT */
+    .editor-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+    .editor-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
+    .editor-label { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); }
+    .editor-actions { display: flex; gap: 8px; }
+    .CodeMirror { height: 200px !important; font-size: 0.86rem !important; background: var(--bg-card) !important; }
+    .run-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--border); background: var(--bg-secondary); flex-wrap: wrap; gap: 8px; }
+    .run-hint { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-dim); }
+
+    .results-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+    .results-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+    .results-label { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); }
+    .exec-time { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-dim); }
+    .results-body { padding: 14px; min-height: 140px; overflow-x: auto; }
+    .results-placeholder { display: flex; align-items: center; justify-content: center; height: 110px; color: var(--text-dim); font-family: var(--font-mono); font-size: 0.8rem; text-align: center; }
+    .error-out { color: var(--danger); font-family: var(--font-mono); font-size: 0.8rem; padding: 10px; background: rgba(239,68,68,0.08); border-radius: 8px; }
+    .nav-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .nav-pair { display: flex; gap: 8px; }
+
+    /* SUCCESS */
+    .success-overlay { display: none; position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(8px); z-index: 300; align-items: center; justify-content: center; padding: 16px; }
+    .success-overlay.show { display: flex; }
+    .success-card { background: var(--bg-card); border: 1px solid var(--accent3); border-radius: 20px; padding: 40px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 0 60px rgba(16,185,129,0.25); animation: fadeInUp 0.3s ease; }
+    .success-icon { font-size: 3rem; margin-bottom: 12px; }
+    .success-title { font-family: var(--font-display); font-size: 1.3rem; color: var(--accent3); margin-bottom: 8px; }
+    .success-xp { font-family: var(--font-display); font-size: 2rem; color: var(--accent); margin: 12px 0; }
+    .success-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+
+    /* Mode colors */
+    body.detective .story-card { border-top: 3px solid #f59e0b; }
+    body.space      .story-card { border-top: 3px solid #7c3aed; }
+    body.dungeon    .story-card { border-top: 3px solid #ef4444; }
+
+    @media (max-width: 900px) { .adv-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) {
+      .adv-layout { padding: 20px 12px; }
+      .CodeMirror { height: 160px !important; }
+      .success-card { padding: 28px 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="scanline"></div>
+<nav class="navbar"></nav>
+<div class="nav-mobile-menu" id="navMobileMenu"></div>
+
+<div class="adv-layout">
+  <!-- LEFT: Story panel -->
+  <div>
+    <div class="story-card">
+      <div class="story-card-header">
+        <div class="story-mode-label" id="modeLabel">ADVENTURE</div>
+        <div class="story-title" id="epTitle">Loading...</div>
+      </div>
+      <div class="story-card-body">
+        <p class="story-narrative" id="epNarrative"></p>
+        <div class="story-objective-box">
+          <div class="obj-label">🎯 Your Objective</div>
+          <div class="obj-text" id="epObjective"></div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <button class="hint-toggle" onclick="toggleHint()">💡 Hint <span id="hintArrow">▼</span></button>
+          <div class="hint-body" id="hintBody"></div>
+        </div>
+        <div class="schema-label">Database Schema</div>
+        <div class="schema-code" id="schemaDisplay"></div>
+        <div class="concept-tags" id="conceptTags"></div>
+        <div class="xp-reward" id="xpReward"></div>
+      </div>
+    </div>
+    <a href="adventures.html" class="btn-ghost" style="width:100%;justify-content:center;">← Back to Adventures</a>
+  </div>
+
+  <!-- RIGHT: Editor + Results -->
+  <div>
+    <div class="editor-card">
+      <div class="editor-topbar">
+        <span class="editor-label">📝 SQL Editor</span>
+        <div class="editor-actions">
+          <button class="btn-ghost btn-sm" onclick="clearEditor()">Clear</button>
+          <button class="btn-ghost btn-sm" onclick="revealSolution()">Solution</button>
+        </div>
+      </div>
+      <textarea id="sqlEditor">-- Write your SQL query here
+SELECT </textarea>
+      <div class="run-bar">
+        <span class="run-hint">Ctrl+Enter to run</span>
+        <button class="btn-run" onclick="runQuery()">▶ Run Query</button>
+      </div>
+    </div>
+
+    <div class="results-card">
+      <div class="results-topbar">
+        <span class="results-label" id="resultsLabel">RESULTS</span>
+        <span class="exec-time" id="execTime"></span>
+      </div>
+      <div class="results-body" id="resultsBody">
+        <div class="results-placeholder">Run your query to see results here.</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <a href="adventures.html" class="btn-ghost">← All Adventures</a>
+      <div class="nav-pair">
+        <button class="btn-ghost btn-sm" id="prevBtn" onclick="navEpisode(-1)">← Prev</button>
+        <button class="btn-ghost btn-sm" id="nextBtn" onclick="navEpisode(1)">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon" id="successIcon">🎉</div>
+    <div class="success-title" id="successTitle">Mission Complete!</div>
+    <div class="success-xp" id="successXP">+0 XP</div>
+    <p style="color:var(--text-muted);font-size:0.86rem;" id="successMsg"></p>
+    <div class="success-actions">
+      <button class="btn-ghost" onclick="closeSuccess()">Stay Here</button>
+      <button class="btn-primary" onclick="goNext()">Next Episode →</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/nav-inject.js"></script>
+<script src="../data/adventure-data.js"></script>
+<script>
+  let db = null, sqlJS = null;
+  let currentEp = null;
+  let allEpisodes = [];
+
+  const params = new URLSearchParams(window.location.search);
+  const epId = params.get('id');
+
+  // Find episode across all modes
+  Object.values(ADVENTURE_DATA).forEach(arr => arr.forEach(ep => allEpisodes.push(ep)));
+  currentEp = allEpisodes.find(e => e.id === epId) || allEpisodes[0];
+
+  // CodeMirror
+  const editor = CodeMirror.fromTextArea(document.getElementById('sqlEditor'), {
+    mode: 'text/x-sql', theme: 'dracula', lineNumbers: true,
+    extraKeys: { 'Ctrl-Enter': runQuery, 'Cmd-Enter': runQuery }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    buildNav('adventures');
+    loadEpisode(currentEp);
+  });
+
+  function loadEpisode(ep) {
+    currentEp = ep;
+    document.body.className = ep.mode;
+    document.title = ep.title + ' — QueryQuest';
+
+    const modeLabels = { detective: '🔍 DETECTIVE AGENCY', space: '🚀 SPACE EXPLORER', dungeon: '⚔️ SQL DUNGEON' };
+    document.getElementById('modeLabel').textContent = modeLabels[ep.mode] || 'ADVENTURE';
+    document.getElementById('epTitle').textContent = ep.title;
+    document.getElementById('epNarrative').textContent = ep.narrative;
+    document.getElementById('epObjective').textContent = ep.objective;
+    document.getElementById('hintBody').textContent = ep.hint;
+    document.getElementById('hintBody').classList.remove('show');
+    document.getElementById('hintArrow').textContent = '▼';
+    document.getElementById('schemaDisplay').textContent = ep.schema.trim();
+    document.getElementById('xpReward').textContent = `⚡ Reward: +${ep.xp} XP`;
+    document.getElementById('conceptTags').innerHTML = ep.concepts.map(c => `<span>${c}</span>`).join('');
+
+    // Nav buttons
+    const idx = allEpisodes.indexOf(ep);
+    document.getElementById('prevBtn').disabled = idx === 0;
+    document.getElementById('nextBtn').disabled = idx === allEpisodes.length - 1;
+
+    // Reset output
+    document.getElementById('resultsBody').innerHTML = '<div class="results-placeholder">Run your query to see results here.</div>';
+    document.getElementById('execTime').textContent = '';
+    document.getElementById('resultsLabel').textContent = 'RESULTS';
+
+    initDB(ep);
+  }
+
+  async function initDB(ep) {
+    try {
+      if (!sqlJS) sqlJS = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` });
+      db = new sqlJS.Database();
+      db.run(ep.schema);
+      db.run(ep.seed);
+    } catch(e) { console.error('DB init:', e); }
+  }
+
+  function runQuery() {
+    if (!db) { showError('Database not ready. Please wait a moment.'); return; }
+    const query = editor.getValue().trim();
+    if (!query) return;
+    const start = Date.now();
+    try {
+      const results = db.exec(query);
+      const elapsed = Date.now() - start;
+      document.getElementById('execTime').textContent = `${elapsed}ms`;
+      if (!results.length) {
+        document.getElementById('resultsBody').innerHTML = '<div class="results-placeholder" style="color:var(--accent3);">✓ Query executed. No rows returned.</div>';
+        return;
+      }
+      const { columns, values } = results[0];
+      renderTable(columns, values);
+      const rows = values.map(row => { const o={}; columns.forEach((c,i) => o[c]=row[i]); return o; });
+      if (currentEp.validate(rows, columns)) handleSuccess();
+    } catch(e) { showError(e.message); }
+  }
+
+  function renderTable(columns, values) {
+    let html = '<div style="overflow-x:auto;"><table class="result-table"><thead><tr>';
+    columns.forEach(c => html += `<th>${c}</th>`);
+    html += '</tr></thead><tbody>';
+    values.forEach(row => {
+      html += '<tr>';
+      row.forEach(cell => html += `<td>${cell===null?'<em style="color:var(--text-dim)">NULL</em>':cell}</td>`);
+      html += '</tr>';
+    });
+    html += `</tbody></table></div><div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-dim);margin-top:8px;">${values.length} row${values.length!==1?'s':''} returned</div>`;
+    document.getElementById('resultsLabel').textContent = '✓ RESULTS';
+    document.getElementById('resultsBody').innerHTML = html;
+  }
+
+  function showError(msg) {
+    document.getElementById('resultsLabel').textContent = '✗ ERROR';
+    document.getElementById('resultsBody').innerHTML = `<div class="error-out">⚠ ${msg}</div>`;
+  }
+
+  function handleSuccess() {
+    const already = QQ.isSolved(currentEp.id);
+    if (!already) {
+      QQ.saveProgress(currentEp.id, { solved: true });
+      const user = QQ.getUser();
+      if (user) QQ.addXP(currentEp.xp);
+    }
+    const icons = { detective: '🔍', space: '🚀', dungeon: '⚔️' };
+    const titles = { detective: 'Case Solved!', space: 'Mission Complete!', dungeon: 'Monster Defeated!' };
+    document.getElementById('successIcon').textContent = icons[currentEp.mode] || '🎉';
+    document.getElementById('successTitle').textContent = titles[currentEp.mode] || 'Complete!';
+    document.getElementById('successXP').textContent = already ? 'Already solved!' : `+${currentEp.xp} XP`;
+    document.getElementById('successMsg').textContent = already ? 'Well done again, detective.' : `Excellent SQL work! ${currentEp.expectedNote}`;
+    document.getElementById('successOverlay').classList.add('show');
+  }
+
+  function closeSuccess() { document.getElementById('successOverlay').classList.remove('show'); }
+  function goNext() { closeSuccess(); navEpisode(1); }
+  function navEpisode(dir) {
+    const idx = allEpisodes.indexOf(currentEp);
+    const next = allEpisodes[idx + dir];
+    if (next) window.location.href = 'adventure-play.html?id=' + next.id;
+  }
+  function toggleHint() {
+    const b = document.getElementById('hintBody');
+    b.classList.toggle('show');
+    document.getElementById('hintArrow').textContent = b.classList.contains('show') ? '▲' : '▼';
+  }
+  function clearEditor() { editor.setValue('-- Write your SQL query here\nSELECT '); editor.focus(); }
+  function revealSolution() {
+    if (confirm('Show the solution? This will replace your current query.')) editor.setValue(currentEp.solutionQuery.trim());
+  }
+</script>
+</body>
+</html>

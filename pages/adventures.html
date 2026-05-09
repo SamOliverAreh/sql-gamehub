@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adventures — QueryQuest</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body { padding-top: 70px; }
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 48px 20px; position: relative; z-index: 1; }
+    .page-header { text-align: center; margin-bottom: 48px; }
+    .page-header h1 { font-size: clamp(1.5rem,4vw,2.2rem); margin-bottom: 10px; }
+    .page-header p { color: var(--text-muted); max-width: 540px; margin: 0 auto; font-size: 0.92rem; }
+    .mode-tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+    .mode-tab { font-family: var(--font-mono); font-size: 0.78rem; padding: 9px 20px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); border-radius: 99px; cursor: pointer; transition: var(--transition); }
+    .mode-tab.active, .mode-tab:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.06); }
+
+    /* Mode hero banners */
+    .mode-banner {
+      border-radius: 16px; padding: 40px 32px; margin-bottom: 40px;
+      position: relative; overflow: hidden; border: 1px solid var(--border);
+    }
+    .mode-banner.detective { background: linear-gradient(135deg, rgba(245,158,11,0.08), var(--bg-card)); border-color: rgba(245,158,11,0.3); }
+    .mode-banner.space     { background: linear-gradient(135deg, rgba(124,58,237,0.08), var(--bg-card)); border-color: rgba(124,58,237,0.3); }
+    .mode-banner.dungeon   { background: linear-gradient(135deg, rgba(239,68,68,0.08),  var(--bg-card)); border-color: rgba(239,68,68,0.3); }
+    .mode-banner-icon { font-size: 3rem; margin-bottom: 12px; }
+    .mode-banner h2 { font-size: clamp(1.2rem,3vw,1.8rem); margin-bottom: 8px; }
+    .mode-banner p { color: var(--text-muted); font-size: 0.9rem; max-width: 600px; line-height: 1.7; margin-bottom: 20px; }
+    .mode-banner-meta { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+    .meta-chip { font-family: var(--font-mono); font-size: 0.7rem; padding: 4px 12px; border-radius: 99px; background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-muted); }
+
+    /* Episode cards */
+    .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px; margin-bottom: 60px; }
+    .episode-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 22px 20px; cursor: pointer; transition: var(--transition);
+      text-decoration: none; color: inherit; display: block; position: relative;
+    }
+    .episode-card:hover { transform: translateY(-3px); box-shadow: var(--glow); border-color: var(--border-bright); }
+    .episode-card.solved { border-color: rgba(16,185,129,0.4); }
+    .episode-card.solved::after { content:'✓'; position:absolute; top:12px; right:12px; width:22px; height:22px; background:var(--accent3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.68rem; color:var(--bg-primary); font-weight:bold; }
+    .ep-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); letter-spacing:0.15em; margin-bottom: 8px; text-transform: uppercase; }
+    .ep-title { font-family: var(--font-display); font-size: 0.92rem; margin-bottom: 8px; }
+    .ep-story { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px; }
+    .ep-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .ep-concepts { display: flex; gap: 5px; flex-wrap: wrap; }
+    .ep-concepts span { font-family: var(--font-mono); font-size: 0.6rem; padding: 2px 7px; border-radius: 4px; background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.18); color: var(--accent); }
+    .ep-xp { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent3); }
+    .ep-locked { opacity: 0.5; cursor: not-allowed; }
+    .ep-locked:hover { transform: none; box-shadow: none; }
+  </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="scanline"></div>
+
+<nav class="navbar"></nav>
+<div class="nav-mobile-menu" id="navMobileMenu"></div>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>🗺️ Adventure Modes</h1>
+    <p>Story-driven SQL missions. Real narratives, real databases, real stakes. Every puzzle requires genuine SQL thinking.</p>
+  </div>
+
+  <div class="mode-tabs">
+    <button class="mode-tab active" onclick="showMode('detective',this)">🔍 Detective Agency</button>
+    <button class="mode-tab" onclick="showMode('space',this)">🚀 Space Explorer</button>
+    <button class="mode-tab" onclick="showMode('dungeon',this)">⚔️ SQL Dungeon</button>
+  </div>
+
+  <!-- DETECTIVE -->
+  <div class="mode-section" id="mode-detective">
+    <div class="mode-banner detective">
+      <div class="mode-banner-icon">🔍</div>
+      <h2>Detective Agency: The DataCorp Scandal</h2>
+      <p>DataCorp's CFO has gone missing. Millions are unaccounted for. As the city's only data detective, you must query witness statements, financial records, transaction logs, and employee databases to piece together the truth. Each case reveals a new layer of the conspiracy.</p>
+      <div class="mode-banner-meta">
+        <span class="meta-chip">6 Cases</span>
+        <span class="meta-chip">+350 XP total</span>
+        <span class="meta-chip">Subqueries · JOINs · Aggregation</span>
+      </div>
+    </div>
+    <div class="episodes-grid" id="detective-episodes"></div>
+  </div>
+
+  <!-- SPACE -->
+  <div class="mode-section" id="mode-space" style="display:none">
+    <div class="mode-banner space">
+      <div class="mode-banner-icon">🚀</div>
+      <h2>Space Explorer: ISS Queryon</h2>
+      <p>You are Lieutenant Vega, Data Officer aboard the ISS Queryon. 40,000 light-years from Earth, systems are failing. Your ship's survival depends on querying navigation logs, crew vitals, cargo manifests, and star charts. One wrong query could strand you in the void forever.</p>
+      <div class="mode-banner-meta">
+        <span class="meta-chip">5 Missions</span>
+        <span class="meta-chip">+500 XP total</span>
+        <span class="meta-chip">CTEs · Window Functions · Subqueries</span>
+      </div>
+    </div>
+    <div class="episodes-grid" id="space-episodes"></div>
+  </div>
+
+  <!-- DUNGEON -->
+  <div class="mode-section" id="mode-dungeon" style="display:none">
+    <div class="mode-banner dungeon">
+      <div class="mode-banner-icon">⚔️</div>
+      <h2>SQL Dungeon: The Cursed Archive</h2>
+      <p>Beneath the Archivist's Tower lies the Cursed Archive — a dungeon where ancient data creatures guard forbidden knowledge. Descend floor by floor, each monster a SQL challenge harder than the last. Only the player who masters recursive queries can claim the Legendary Key and escape.</p>
+      <div class="mode-banner-meta">
+        <span class="meta-chip">7 Floors</span>
+        <span class="meta-chip">+700 XP total</span>
+        <span class="meta-chip">All SQL Levels · Recursive CTEs</span>
+      </div>
+    </div>
+    <div class="episodes-grid" id="dungeon-episodes"></div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-logo">⬡ QueryQuest</div>
+  <p class="footer-sub">Adventure Mode — Story-driven SQL challenges</p>
+  <div class="footer-links">
+    <a href="challenges.html">Standard Challenges</a>
+    <a href="leaderboard.html">Leaderboard</a>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/nav-inject.js"></script>
+<script src="../data/adventure-data.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    buildNav('adventures');
+    renderEpisodes();
+
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    if (mode) {
+      const tab = document.querySelector(`.mode-tab[onclick*="${mode}"]`);
+      if (tab) showMode(mode, tab);
+    }
+  });
+
+  function showMode(mode, btn) {
+    document.querySelectorAll('.mode-section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('mode-' + mode).style.display = 'block';
+    btn.classList.add('active');
+  }
+
+  function renderEpisodes() {
+    const progress = QQ.getProgress();
+    const user = QQ.getUser();
+    const userXP = user ? (user.xp || 0) : 999;
+
+    ['detective', 'space', 'dungeon'].forEach(mode => {
+      const container = document.getElementById(mode + '-episodes');
+      const episodes = ADVENTURE_DATA[mode];
+      if (!container || !episodes) return;
+
+      episodes.forEach((ep, idx) => {
+        const solved = progress[ep.id]?.solved;
+        const locked = idx > 0 && !progress[episodes[idx-1].id]?.solved;
+        const card = document.createElement('a');
+        card.href = locked ? '#' : `adventure-play.html?id=${ep.id}`;
+        card.className = `episode-card${solved ? ' solved' : ''}${locked ? ' ep-locked' : ''}`;
+        card.innerHTML = `
+          <div class="ep-num">${mode.toUpperCase()} · CASE ${String(idx+1).padStart(2,'0')}</div>
+          <div class="ep-title">${locked ? '🔒 ' : ''}${ep.title}</div>
+          <div class="ep-story">${ep.story}</div>
+          <div class="ep-footer">
+            <div class="ep-concepts">${ep.concepts.slice(0,3).map(c=>`<span>${c}</span>`).join('')}</div>
+            <div class="ep-xp">+${ep.xp} XP</div>
+          </div>
+        `;
+        if (locked) card.addEventListener('click', e => { e.preventDefault(); alert('Complete the previous case first!'); });
+        container.appendChild(card);
+      });
+    });
+  }
+</script>
+</body>
+</html>
