@@ -12,30 +12,9 @@
 <div class="bg-grid"></div>
 <div class="scanline"></div>
 
-<nav class="navbar">
-  <a href="index.html" class="nav-logo"><span class="logo-icon">⬡</span><span class="logo-text">QueryQuest</span></a>
-  <div class="nav-links">
-    <a href="pages/challenges.html">Challenges</a>
-    <a href="pages/adventures.html">Adventures</a>
-    <a href="pages/leaderboard.html">Leaderboard</a>
-    <a href="pages/about.html">About</a>
-  </div>
-  <div class="nav-auth" id="navAuth"></div>
-  <button class="theme-toggle" id="themeToggle" title="Toggle theme">☀️</button>
-  <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
+<nav class="navbar"></nav>
+<div class="nav-mobile-menu" id="navMobileMenu"></div>
 
-<div class="nav-mobile-menu" id="navMobileMenu">
-  <a href="pages/challenges.html">Challenges</a>
-  <a href="pages/adventures.html">Adventures</a>
-  <a href="pages/leaderboard.html">Leaderboard</a>
-  <a href="pages/about.html">About</a>
-  <div class="mobile-divider"></div>
-  <a href="pages/login.html" id="mobileLogin">Login</a>
-  <a href="pages/register.html" id="mobileRegister">Play Now →</a>
-</div>
 
 <section class="hero">
   <div class="hero-badge"><span class="pulse-dot"></span> LIVE — Play &amp; learn SQL</div>
@@ -133,6 +112,8 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="js/nav-inject.js"></script>
 <script src="js/terminal-demo.js"></script>
+<script>document.addEventListener('DOMContentLoaded', () => buildNav('home'));</script>
 </body>
 </html>
