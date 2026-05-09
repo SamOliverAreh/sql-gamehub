@@ -1,177 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>QueryQuest — SQL GameHub</title>
-  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/main.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-<body class="home-page">
+<body>
+<div class="bg-grid"></div>
+<div class="scanline"></div>
 
-  <!-- Animated grid background -->
-  <div class="bg-grid"></div>
-  <div class="scanline"></div>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo"><span class="logo-icon">⬡</span><span class="logo-text">QueryQuest</span></a>
+  <div class="nav-links">
+    <a href="pages/challenges.html">Challenges</a>
+    <a href="pages/adventures.html">Adventures</a>
+    <a href="pages/leaderboard.html">Leaderboard</a>
+    <a href="pages/about.html">About</a>
+  </div>
+  <div class="nav-auth" id="navAuth"></div>
+  <button class="theme-toggle" id="themeToggle" title="Toggle theme">☀️</button>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
-  <!-- NAV -->
-  <nav class="navbar">
-    <div class="nav-logo">
-      <span class="logo-icon">⬡</span>
-      <span class="logo-text">QueryQuest</span>
-    </div>
-    <div class="nav-links">
-      <a href="pages/challenges.html">Challenges</a>
-      <a href="pages/leaderboard.html">Leaderboard</a>
-      <a href="pages/about.html">About</a>
-    </div>
-    <div class="nav-auth" id="navAuth">
-      <a href="pages/login.html" class="btn-ghost">Login</a>
-      <a href="pages/register.html" class="btn-primary">Play Now</a>
-    </div>
-  </nav>
+<div class="nav-mobile-menu" id="navMobileMenu">
+  <a href="pages/challenges.html">Challenges</a>
+  <a href="pages/adventures.html">Adventures</a>
+  <a href="pages/leaderboard.html">Leaderboard</a>
+  <a href="pages/about.html">About</a>
+  <div class="mobile-divider"></div>
+  <a href="pages/login.html" id="mobileLogin">Login</a>
+  <a href="pages/register.html" id="mobileRegister">Play Now →</a>
+</div>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-badge">
-      <span class="pulse-dot"></span> Game On !!!
+<section class="hero">
+  <div class="hero-badge"><span class="pulse-dot"></span> LIVE — Play &amp; learn SQL</div>
+  <h1 class="hero-title">
+    <span class="line1">Master SQL.</span>
+    <span class="line2">Compete. <span class="accent">Win.</span></span>
+  </h1>
+  <p class="hero-sub">A gamified SQL challenge platform. Write real queries, beat real puzzles, climb the leaderboard — and prove you're a true data wizard.</p>
+  <div class="hero-cta">
+    <a href="pages/register.html" class="btn-primary btn-lg">Start Your Journey →</a>
+    <a href="pages/challenges.html" class="btn-ghost btn-lg">Browse Challenges</a>
+  </div>
+  <div class="terminal-preview">
+    <div class="term-bar">
+      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      <span class="term-title">queryquest.db — challenge_01.sql</span>
     </div>
-    <h1 class="hero-title">
-      <span class="line1">Master SQL.</span>
-      <span class="line2">Compete. <span class="accent">Win.</span></span>
-    </h1>
-    <p class="hero-sub">
-      A gamified SQL challenge platform. Write real queries, beat real puzzles, 
-      climb the leaderboard — and prove you're a true data wizard.
-    </p>
-    <div class="hero-cta">
-      <a href="pages/register.html" class="btn-primary btn-lg">Start Your Journey →</a>
-      <a href="pages/challenges.html" class="btn-ghost btn-lg">Browse Challenges</a>
+    <div class="term-body">
+      <div class="term-line comment">-- Challenge: Find the top 5 highest-paid employees</div>
+      <div class="term-line keyword" id="typedLine"></div>
+      <div class="term-line result" id="resultLine"></div>
     </div>
+  </div>
+</section>
 
-    <!-- Mini terminal preview -->
-    <div class="terminal-preview">
-      <div class="term-bar">
-        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-        <span class="term-title">queryquest.db — challenge_01.sql</span>
-      </div>
-      <div class="term-body" id="termBody">
-        <div class="term-line comment">-- Challenge: Find the top 5 highest-paid employees</div>
-        <div class="term-line keyword" id="typedLine"></div>
-        <div class="term-line result" id="resultLine"></div>
-      </div>
-    </div>
-  </section>
+<section class="stats-bar">
+  <div class="stat"><span class="stat-num" data-target="42">0</span><span class="stat-label">Challenges</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><span class="stat-num" data-target="6">0</span><span class="stat-label">Difficulty Tiers</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><span class="stat-num" data-target="3">0</span><span class="stat-label">Adventure Modes</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><span class="stat-num" data-target="900">0</span><span class="stat-label">Max XP</span></div>
+</section>
 
-  <!-- STATS -->
-  <section class="stats-bar">
-    <div class="stat"><span class="stat-num" data-target="42">0</span><span class="stat-label">Challenges</span></div>
-    <div class="stat-divider"></div>
-    <div class="stat"><span class="stat-num" data-target="6">0</span><span class="stat-label">Difficulty Tiers</span></div>
-    <div class="stat-divider"></div>
-    <div class="stat"><span class="stat-num" data-target="12">0</span><span class="stat-label">SQL Concepts</span></div>
-    <div class="stat-divider"></div>
-    <div class="stat"><span class="stat-num" data-target="500">0</span><span class="stat-label">Points to Earn</span></div>
-  </section>
+<section class="levels-section">
+  <h2 class="section-title">Choose Your Tier</h2>
+  <p class="section-sub">Six difficulty levels — each designed to test a deeper layer of SQL mastery.</p>
+  <div class="levels-grid">
+    <div class="level-card" data-level="1"><div class="level-rank">01</div><div class="level-icon">🌱</div><h3>Rookie</h3><p>SELECT, WHERE, ORDER BY. Your first steps into the query world.</p><div class="level-tags"><span>SELECT</span><span>WHERE</span><span>ORDER BY</span></div><div class="level-xp">+10–15 XP per solve</div></div>
+    <div class="level-card" data-level="2"><div class="level-rank">02</div><div class="level-icon">⚡</div><h3>Amateur</h3><p>GROUP BY, HAVING, aggregate functions. Make data talk.</p><div class="level-tags"><span>GROUP BY</span><span>HAVING</span><span>AVG/SUM</span></div><div class="level-xp">+25–30 XP per solve</div></div>
+    <div class="level-card active" data-level="3"><div class="level-rank">03</div><div class="level-icon">🔗</div><h3>Skilled</h3><p>JOINs — INNER, LEFT, RIGHT, FULL. Bring tables together.</p><div class="level-tags"><span>INNER JOIN</span><span>LEFT JOIN</span><span>UNION</span></div><div class="level-xp">+50 XP per solve</div></div>
+    <div class="level-card" data-level="4"><div class="level-rank">04</div><div class="level-icon">🧠</div><h3>Advanced</h3><p>Subqueries, CTEs, window functions. Think in layers.</p><div class="level-tags"><span>CTE</span><span>Subquery</span><span>OVER()</span></div><div class="level-xp">+100–120 XP per solve</div></div>
+    <div class="level-card" data-level="5"><div class="level-rank">05</div><div class="level-icon">🏆</div><h3>Expert</h3><p>Query optimization, window analytics. Speed is skill.</p><div class="level-tags"><span>RANK()</span><span>PARTITION</span><span>Running Total</span></div><div class="level-xp">+200 XP per solve</div></div>
+    <div class="level-card locked" data-level="6"><div class="level-rank">06</div><div class="level-icon">🔒</div><h3>Legendary</h3><p>Recursive CTEs, advanced analytics. Only the elite reach here.</p><div class="level-tags"><span>RECURSIVE</span><span>Hierarchy</span><span>Analytics</span></div><div class="level-xp">+500 XP per solve</div></div>
+  </div>
+  <div class="section-cta"><a href="pages/challenges.html" class="btn-primary">View All Challenges →</a></div>
+</section>
 
-  <!-- LEVELS PREVIEW -->
-  <section class="levels-section">
-    <h2 class="section-title">Choose Your Tier</h2>
-    <p class="section-sub">Progress through six difficulty levels — each designed to test a deeper layer of SQL mastery.</p>
-    <div class="levels-grid">
-      <div class="level-card" data-level="1">
-        <div class="level-rank">01</div>
-        <div class="level-icon">🌱</div>
-        <h3>Rookie</h3>
-        <p>SELECT, WHERE, ORDER BY. Your first steps into the query world.</p>
-        <div class="level-tags"><span>SELECT</span><span>WHERE</span><span>ORDER BY</span></div>
-        <div class="level-xp">+10 XP per solve</div>
-      </div>
-      <div class="level-card" data-level="2">
-        <div class="level-rank">02</div>
-        <div class="level-icon">⚡</div>
-        <h3>Amateur</h3>
-        <p>GROUP BY, HAVING, aggregate functions. Make data talk.</p>
-        <div class="level-tags"><span>GROUP BY</span><span>HAVING</span><span>COUNT/SUM</span></div>
-        <div class="level-xp">+25 XP per solve</div>
-      </div>
-      <div class="level-card active" data-level="3">
-        <div class="level-rank">03</div>
-        <div class="level-icon">🔗</div>
-        <h3>Skilled</h3>
-        <p>JOINs — INNER, LEFT, RIGHT, FULL. Bring tables together.</p>
-        <div class="level-tags"><span>INNER JOIN</span><span>LEFT JOIN</span><span>UNION</span></div>
-        <div class="level-xp">+50 XP per solve</div>
-      </div>
-      <div class="level-card" data-level="4">
-        <div class="level-rank">04</div>
-        <div class="level-icon">🧠</div>
-        <h3>Advanced</h3>
-        <p>Subqueries, CTEs, window functions. Think in layers.</p>
-        <div class="level-tags"><span>CTE</span><span>Subquery</span><span>OVER()</span></div>
-        <div class="level-xp">+100 XP per solve</div>
-      </div>
-      <div class="level-card" data-level="5">
-        <div class="level-rank">05</div>
-        <div class="level-icon">🏆</div>
-        <h3>Expert</h3>
-        <p>Query optimization, indexing, execution plans. Speed is skill.</p>
-        <div class="level-tags"><span>INDEX</span><span>EXPLAIN</span><span>Optimize</span></div>
-        <div class="level-xp">+200 XP per solve</div>
-      </div>
-      <div class="level-card locked" data-level="6">
-        <div class="level-rank">06</div>
-        <div class="level-icon">🔒</div>
-        <h3>Legendary</h3>
-        <p>Recursive queries, advanced analytics. Only the elite reach here.</p>
-        <div class="level-tags"><span>RECURSIVE</span><span>Pivoting</span><span>Analytics</span></div>
-        <div class="level-xp">+500 XP per solve</div>
-      </div>
-    </div>
-    <div class="section-cta">
-      <a href="pages/challenges.html" class="btn-primary">View All Challenges →</a>
-    </div>
-  </section>
+<section class="adventure-section" style="position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 32px 80px;">
+  <h2 class="section-title">Adventure Modes 🗺️</h2>
+  <p class="section-sub">Story-driven SQL challenges. Solve mysteries, explore galaxies, survive dungeons — all with real SQL queries.</p>
+  <div class="adventure-grid">
+    <a href="pages/adventures.html?mode=detective" class="adventure-card detective">
+      <div class="adv-header"><div class="adv-icon">🔍</div><div class="adv-episodes">6 CASES</div></div>
+      <div class="adv-title">Detective Agency</div>
+      <div class="adv-desc">A string of corporate crimes. Only SQL can crack the case. Query witness records, financial logs, and surveillance data to unmask the culprit.</div>
+      <div class="adv-footer"><div class="adv-tags"><span class="badge badge-detective">Mystery</span><span class="badge badge-skilled">Subqueries</span></div><div class="adv-xp">Up to +350 XP</div></div>
+    </a>
+    <a href="pages/adventures.html?mode=space" class="adventure-card space">
+      <div class="adv-header"><div class="adv-icon">🚀</div><div class="adv-episodes">5 MISSIONS</div></div>
+      <div class="adv-title">Space Explorer</div>
+      <div class="adv-desc">You're the data officer aboard the ISS Queryon. Navigate star maps, manage crew manifests and fuel logs to keep your mission alive.</div>
+      <div class="adv-footer"><div class="adv-tags"><span class="badge badge-space">Sci-Fi</span><span class="badge badge-advanced">CTEs</span></div><div class="adv-xp">Up to +500 XP</div></div>
+    </a>
+    <a href="pages/adventures.html?mode=dungeon" class="adventure-card dungeon">
+      <div class="adv-header"><div class="adv-icon">⚔️</div><div class="adv-episodes">7 FLOORS</div></div>
+      <div class="adv-title">SQL Dungeon</div>
+      <div class="adv-desc">Descend through a dark dungeon, floor by floor. Each room holds a monster — a SQL puzzle. Defeat them all to claim the Legendary Key.</div>
+      <div class="adv-footer"><div class="adv-tags"><span class="badge badge-dungeon">RPG</span><span class="badge badge-expert">Window Fns</span></div><div class="adv-xp">Up to +700 XP</div></div>
+    </a>
+  </div>
+  <div class="section-cta"><a href="pages/adventures.html" class="btn-ghost">Explore All Adventures →</a></div>
+</section>
 
-  <!-- FEATURES -->
-  <section class="features-section">
-    <h2 class="section-title">Why QueryQuest?</h2>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feat-icon">💾</div>
-        <h3>Real SQL Engine</h3>
-        <p>Powered by SQL.js — a real SQLite engine running in your browser. Your queries actually execute against real datasets.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feat-icon">🎯</div>
-        <h3>Instant Feedback</h3>
-        <p>See your query results in milliseconds. Get hints when stuck. Understand why your answer is right or wrong.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feat-icon">📊</div>
-        <h3>Leaderboard & XP</h3>
-        <p>Earn XP for each solved challenge. Compete globally on the leaderboard and unlock milestones.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feat-icon">🗺️</div>
-        <h3>Skill Progression</h3>
-        <p>Structured from basic SELECT to recursive CTEs. Every challenge builds on the last — a true learning arc.</p>
-      </div>
-    </div>
-  </section>
+<section class="features-section">
+  <h2 class="section-title">Why QueryQuest?</h2>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feat-icon">💾</div><h3>Real SQL Engine</h3><p>Powered by SQL.js — a real SQLite engine in your browser. Your queries actually execute against real datasets.</p></div>
+    <div class="feature-card"><div class="feat-icon">🎯</div><h3>Instant Feedback</h3><p>See results in milliseconds. Hints when stuck. Understand exactly why your answer is right or wrong.</p></div>
+    <div class="feature-card"><div class="feat-icon">📊</div><h3>XP &amp; Leaderboard</h3><p>Earn XP for each solved challenge. Compete on the global leaderboard and unlock adventure modes.</p></div>
+    <div class="feature-card"><div class="feat-icon">🗺️</div><h3>Story Adventures</h3><p>Detective, Space, and Dungeon modes make SQL exciting. Real narrative, real queries — not just dry exercises.</p></div>
+  </div>
+</section>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer-logo">⬡ QueryQuest</div>
-    <p class="footer-sub">Built as a SQL portfolio project · Showcasing real-world data skills</p>
-    <div class="footer-links">
-      <a href="https://github.com/SamOliverAreh/sql-gamehub/" target="_blank">GitHub</a>
-      <a href="pages/about.html">About</a>
-      <a href="pages/challenges.html">Challenges</a>
-    </div>
-  </footer>
+<footer class="footer">
+  <div class="footer-logo">⬡ QueryQuest</div>
+  <p class="footer-sub">Built as a SQL portfolio project · Showcasing real-world data skills</p>
+  <div class="footer-links">
+    <a href="https://github.com/SamOliverAreh/sql-gamehub/" target="_blank">GitHub</a>
+    <a href="pages/about.html">About</a>
+    <a href="pages/challenges.html">Challenges</a>
+    <a href="pages/adventures.html">Adventures</a>
+  </div>
+</footer>
 
-  <script src="js/main.js"></script>
-  <script src="js/terminal-demo.js"></script>
+<script src="js/main.js"></script>
+<script src="js/terminal-demo.js"></script>
 </body>
 </html>
