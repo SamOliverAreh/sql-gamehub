@@ -71,7 +71,7 @@ sql-gamehub/
 2. Push to your GitHub account
 3. Go to **Settings → Pages**
 4. Set Source to **Deploy from branch: main / root**
-5. Your site will be live at `https://your.username.github.io/sql-gamehub/index.html`
+5. Your site will be live at `https://your-username.github.io/sql-gamehub/`
 
 No build step. No dependencies. Pure HTML/CSS/JS.
 
