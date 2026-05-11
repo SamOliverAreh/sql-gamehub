@@ -14,6 +14,7 @@
     .auth-sub { color:var(--text-muted); font-size:0.84rem; margin-bottom:28px; }
     .auth-switch { text-align:center; margin-top:20px; color:var(--text-muted); font-size:0.84rem; }
     .auth-switch a { color:var(--accent); text-decoration:none; }
+    .btn-loading { opacity:0.7; pointer-events:none; }
     @media(max-width:480px){ .auth-card { padding:28px 18px; } }
   </style>
 </head>
@@ -30,7 +31,7 @@
   <div id="alertBox"></div>
   <div class="form-group"><label>Username</label><input type="text" id="username" placeholder="your_handle"/></div>
   <div class="form-group"><label>Password</label><input type="password" id="password" placeholder="••••••••"/></div>
-  <button class="btn-primary" style="width:100%;justify-content:center;padding:13px;" onclick="handleLogin()">Login →</button>
+  <button class="btn-primary" id="loginBtn" style="width:100%;justify-content:center;padding:13px;" onclick="handleLogin()">Login →</button>
   <div class="auth-switch">Don't have an account? <a href="register.html">Register here</a></div>
 </div>
 
@@ -39,21 +40,30 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   buildNav('');
-  if (QQ.getUser()) window.location.href = 'dashboard.html';
+  // If already has valid token, restore and redirect
+  const token = localStorage.getItem('qq_token');
+  if (token) {
+    QQ.restoreSession().then(user => {
+      if (user) window.location.href = 'dashboard.html';
+    });
+  }
 });
-function showAlert(msg,type='error'){document.getElementById('alertBox').innerHTML=`<div class="alert alert-${type}">${msg}</div>`;}
-function handleLogin(){
-  const u=document.getElementById('username').value.trim();
-  const p=document.getElementById('password').value;
-  if(!u||!p)return showAlert('Please fill in all fields.');
-  const users=JSON.parse(localStorage.getItem('qq_users')||'[]');
-  const user=users.find(x=>x.username.toLowerCase()===u.toLowerCase()&&x.password===p);
-  if(!user)return showAlert('Invalid username or password.');
-  QQ.setUser(user);
-  showAlert('Login successful! Redirecting...','success');
-  setTimeout(()=>window.location.href='dashboard.html',1000);
+function showAlert(msg, type='error') {
+  document.getElementById('alertBox').innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
 }
-document.addEventListener('keydown',e=>{if(e.key==='Enter')handleLogin();});
+async function handleLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  if (!username || !password) return showAlert('Please fill in all fields.');
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Logging in...'; btn.classList.add('btn-loading');
+  const r = await QQ.login(username, password);
+  btn.textContent = 'Login →'; btn.classList.remove('btn-loading');
+  if (!r.ok) return showAlert(r.error || 'Login failed.');
+  showAlert('Login successful! Redirecting...', 'success');
+  setTimeout(() => window.location.href = 'dashboard.html', 800);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
 </script>
 </body>
 </html>
