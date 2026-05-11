@@ -67,8 +67,12 @@
 <script src="../js/nav-inject.js"></script>
 <script src="../data/challenges.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   buildNav('challenges');
+
+  // Always restore fresh XP + progress from server before rendering tier locks
+  await QQ.restoreSession();
+
   renderChallenges();
   const params = new URLSearchParams(window.location.search);
   const lvl = params.get('level');
