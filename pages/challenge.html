@@ -208,15 +208,28 @@ function renderTable(cols,vals) {
 }
 function showError(msg){document.getElementById('resultsLabel').textContent='✗ ERROR';document.getElementById('resultsBody').innerHTML=`<div class="error-out">⚠ ${msg}</div>`;}
 async function handleSuccess(){
-  const already = QQ.isSolved(currentChallenge.id);
-  if (!already) {
-    // Save to server + local
-    await QQ.saveProgress(currentChallenge.id);
+  // Always show the success overlay — query was correct
+  // Let the SERVER decide if this is first time (alreadySolved)
+  // This fixes: local cache saying solved when server disagrees
+  const result = await QQ.saveProgress(currentChallenge.id);
+  const firstTime = result && result.ok && !result.alreadySolved;
+
+  if (firstTime) {
     await QQ.addXP(currentChallenge.xp);
     document.getElementById('solvedBadge').innerHTML = '<span class="badge badge-rookie">✓ Solved</span>';
+    // Update XP display in nav if present
+    const navXP = document.querySelector('.nav-user');
+    if (navXP) {
+      const user = QQ.getUser();
+      if (user) navXP.textContent = '⬡ ' + user.username;
+    }
   }
-  document.getElementById('successXP').textContent = already ? 'Already solved!' : '+' + currentChallenge.xp + ' XP';
-  document.getElementById('successMsg').textContent = already ? 'Great work, already solved this one!' : 'Expected: ' + currentChallenge.expectedNote;
+
+  // Always show popup — first time or retry
+  document.getElementById('successXP').textContent  = firstTime ? '+' + currentChallenge.xp + ' XP earned! 🎉' : 'Already completed ✓';
+  document.getElementById('successMsg').textContent = firstTime
+    ? 'Correct! ' + currentChallenge.expectedNote
+    : 'You already solved this one. No extra XP, but great practice!';
   document.getElementById('successOverlay').classList.add('show');
 }
 function closeSuccess(){document.getElementById('successOverlay').classList.remove('show');}
