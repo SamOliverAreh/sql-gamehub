@@ -65,8 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function render() {
   const user = QQ.getUser();
   let board = JSON.parse(localStorage.getItem('qq_leaderboard')||'[]');
-  const demos=[{username:'sql_master_99',xp:1850,level:'Expert'},{username:'query_queen',xp:1200,level:'Expert'},{username:'data_wizard',xp:750,level:'Advanced'},{username:'table_joiner',xp:420,level:'Advanced'},{username:'select_star',xp:190,level:'Skilled'}];
-  demos.forEach(d=>{if(!board.find(e=>e.username===d.username))board.push(d);});
   board.sort((a,b)=>b.xp-a.xp);
 
   if (user) {
