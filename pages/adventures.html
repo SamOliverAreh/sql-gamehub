@@ -8,60 +8,62 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     body { padding-top: 70px; }
-    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 48px 20px; position: relative; z-index: 1; }
-    .page-header { text-align: center; margin-bottom: 48px; }
-    .page-header h1 { font-size: clamp(1.5rem,4vw,2.2rem); margin-bottom: 10px; }
-    .page-header p { color: var(--text-muted); max-width: 540px; margin: 0 auto; font-size: 0.92rem; }
-    .mode-tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
-    .mode-tab { font-family: var(--font-mono); font-size: 0.78rem; padding: 9px 20px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); border-radius: 99px; cursor: pointer; transition: var(--transition); }
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
+    .page-header { text-align: center; margin-bottom: 40px; }
+    .page-header h1 { font-size: clamp(1.4rem,4vw,2rem); margin-bottom: 8px; }
+    .page-header p { color: var(--text-muted); max-width: 540px; margin: 0 auto; font-size: 0.9rem; }
+    .mode-tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 36px; }
+    .mode-tab { font-family: var(--font-mono); font-size: 0.75rem; padding: 9px 18px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); border-radius: 99px; cursor: pointer; transition: var(--transition); }
     .mode-tab.active, .mode-tab:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.06); }
-
-    /* Mode hero banners */
-    .mode-banner {
-      border-radius: 16px; padding: 40px 32px; margin-bottom: 40px;
-      position: relative; overflow: hidden; border: 1px solid var(--border);
-    }
-    .mode-banner.detective { background: linear-gradient(135deg, rgba(245,158,11,0.08), var(--bg-card)); border-color: rgba(245,158,11,0.3); }
-    .mode-banner.space     { background: linear-gradient(135deg, rgba(124,58,237,0.08), var(--bg-card)); border-color: rgba(124,58,237,0.3); }
-    .mode-banner.dungeon   { background: linear-gradient(135deg, rgba(239,68,68,0.08),  var(--bg-card)); border-color: rgba(239,68,68,0.3); }
-    .mode-banner-icon { font-size: 3rem; margin-bottom: 12px; }
-    .mode-banner h2 { font-size: clamp(1.2rem,3vw,1.8rem); margin-bottom: 8px; }
-    .mode-banner p { color: var(--text-muted); font-size: 0.9rem; max-width: 600px; line-height: 1.7; margin-bottom: 20px; }
-    .mode-banner-meta { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-    .meta-chip { font-family: var(--font-mono); font-size: 0.7rem; padding: 4px 12px; border-radius: 99px; background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-muted); }
-
-    /* Episode cards */
-    .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px; margin-bottom: 60px; }
-    .episode-card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 22px 20px; cursor: pointer; transition: var(--transition);
-      text-decoration: none; color: inherit; display: block; position: relative;
-    }
+    .mode-banner { border-radius: 14px; padding: 32px 28px; margin-bottom: 32px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+    .mode-banner.detective { background: linear-gradient(135deg,rgba(245,158,11,0.07),var(--bg-card)); border-color: rgba(245,158,11,0.3); }
+    .mode-banner.space     { background: linear-gradient(135deg,rgba(124,58,237,0.07),var(--bg-card)); border-color: rgba(124,58,237,0.3); }
+    .mode-banner.dungeon   { background: linear-gradient(135deg,rgba(239,68,68,0.07), var(--bg-card)); border-color: rgba(239,68,68,0.3); }
+    .mode-banner-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .mode-banner h2 { font-size: clamp(1.1rem,3vw,1.6rem); margin-bottom: 8px; }
+    .mode-banner p { color: var(--text-muted); font-size: 0.87rem; max-width: 600px; line-height: 1.7; margin-bottom: 16px; }
+    .mode-banner-meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .meta-chip { font-family: var(--font-mono); font-size: 0.68rem; padding: 4px 10px; border-radius: 99px; background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-muted); }
+    /* Mode overall progress bar */
+    .mode-prog-bar { margin-top: 16px; }
+    .mode-prog-label { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); margin-bottom: 5px; display: flex; justify-content: space-between; }
+    .mode-prog-bg { height: 5px; background: var(--bg-secondary); border-radius: 99px; overflow: hidden; }
+    .mode-prog-fill { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+    .detective .mode-prog-fill { background: #f59e0b; }
+    .space     .mode-prog-fill { background: #7c3aed; }
+    .dungeon   .mode-prog-fill { background: #ef4444; }
+    /* Episode grid */
+    .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(290px,1fr)); gap: 14px; margin-bottom: 52px; }
+    .episode-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 18px; cursor: pointer; transition: var(--transition); text-decoration: none; color: inherit; display: block; position: relative; }
     .episode-card:hover { transform: translateY(-3px); box-shadow: var(--glow); border-color: var(--border-bright); }
-    .episode-card.solved { border-color: rgba(16,185,129,0.4); }
-    .episode-card.solved::after { content:'✓'; position:absolute; top:12px; right:12px; width:22px; height:22px; background:var(--accent3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.68rem; color:var(--bg-primary); font-weight:bold; }
-    .ep-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); letter-spacing:0.15em; margin-bottom: 8px; text-transform: uppercase; }
-    .ep-title { font-family: var(--font-display); font-size: 0.92rem; margin-bottom: 8px; }
-    .ep-story { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px; }
-    .ep-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-    .ep-concepts { display: flex; gap: 5px; flex-wrap: wrap; }
-    .ep-concepts span { font-family: var(--font-mono); font-size: 0.6rem; padding: 2px 7px; border-radius: 4px; background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.18); color: var(--accent); }
-    .ep-xp { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent3); }
-    .ep-locked { opacity: 0.5; cursor: not-allowed; }
-    .ep-locked:hover { transform: none; box-shadow: none; }
+    /* FIX 2: solved state */
+    .episode-card.solved { border-color: rgba(16,185,129,0.45); }
+    .episode-card.solved::after { content:'✓'; position:absolute; top:10px; right:10px; width:22px; height:22px; background:var(--accent3); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:var(--bg-primary); font-weight:bold; }
+    /* FIX 2: locked state - only truly locked (not just unsolved) */
+    .episode-card.ep-locked { opacity: 0.45; cursor: not-allowed; }
+    .episode-card.ep-locked:hover { transform: none; box-shadow: none; border-color: var(--border); }
+    /* ep-available: unlocked but not solved */
+    .episode-card.ep-available { border-color: var(--border); }
+    .ep-num { font-family: var(--font-mono); font-size: 0.63rem; color: var(--text-dim); letter-spacing:0.15em; margin-bottom: 7px; text-transform: uppercase; }
+    .ep-title { font-family: var(--font-display); font-size: 0.9rem; margin-bottom: 7px; }
+    .ep-story { font-size: 0.79rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 12px; }
+    .ep-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .ep-concepts { display: flex; gap: 4px; flex-wrap: wrap; }
+    .ep-concepts span { font-family: var(--font-mono); font-size: 0.58rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.18); color: var(--accent); }
+    .ep-xp { font-family: var(--font-mono); font-size: 0.68rem; color: var(--accent3); }
+    .ep-status { font-family: var(--font-mono); font-size: 0.63rem; }
   </style>
 </head>
 <body>
 <div class="bg-grid"></div>
 <div class="scanline"></div>
-
 <nav class="navbar"></nav>
 <div class="nav-mobile-menu" id="navMobileMenu"></div>
 
 <div class="page-wrap">
   <div class="page-header">
     <h1>🗺️ Adventure Modes</h1>
-    <p>Story-driven SQL missions. Real narratives, real databases, real stakes. Every puzzle requires genuine SQL thinking.</p>
+    <p>Story-driven SQL missions. Real narratives, real databases, real stakes. Every puzzle needs genuine SQL thinking.</p>
   </div>
 
   <div class="mode-tabs">
@@ -70,46 +72,52 @@
     <button class="mode-tab" onclick="showMode('dungeon',this)">⚔️ SQL Dungeon</button>
   </div>
 
-  <!-- DETECTIVE -->
   <div class="mode-section" id="mode-detective">
     <div class="mode-banner detective">
       <div class="mode-banner-icon">🔍</div>
       <h2>Detective Agency: The DataCorp Scandal</h2>
-      <p>DataCorp's CFO has gone missing. Millions are unaccounted for. As the city's only data detective, you must query witness statements, financial records, transaction logs, and employee databases to piece together the truth. Each case reveals a new layer of the conspiracy.</p>
+      <p>DataCorp's CFO has gone missing. Millions are unaccounted for. Query witness statements, financial records, and surveillance data to piece together the truth.</p>
       <div class="mode-banner-meta">
         <span class="meta-chip">6 Cases</span>
-        <span class="meta-chip">+350 XP total</span>
-        <span class="meta-chip">Subqueries · JOINs · Aggregation</span>
+        <span class="meta-chip" id="det-xp-meta">+350 XP total</span>
+      </div>
+      <div class="mode-prog-bar">
+        <div class="mode-prog-label"><span id="det-prog-label">0/6 cases solved</span><span id="det-prog-pct">0%</span></div>
+        <div class="mode-prog-bg"><div class="mode-prog-fill" id="det-prog-fill" style="width:0%"></div></div>
       </div>
     </div>
     <div class="episodes-grid" id="detective-episodes"></div>
   </div>
 
-  <!-- SPACE -->
   <div class="mode-section" id="mode-space" style="display:none">
     <div class="mode-banner space">
       <div class="mode-banner-icon">🚀</div>
       <h2>Space Explorer: ISS Queryon</h2>
-      <p>You are Lieutenant Vega, Data Officer aboard the ISS Queryon. 40,000 light-years from Earth, systems are failing. Your ship's survival depends on querying navigation logs, crew vitals, cargo manifests, and star charts. One wrong query could strand you in the void forever.</p>
+      <p>You are Lieutenant Vega, Data Officer aboard the ISS Queryon. 40,000 light-years from Earth, systems are failing. Your ship's survival depends on SQL.</p>
       <div class="mode-banner-meta">
         <span class="meta-chip">5 Missions</span>
-        <span class="meta-chip">+500 XP total</span>
-        <span class="meta-chip">CTEs · Window Functions · Subqueries</span>
+        <span class="meta-chip" id="sp-xp-meta">+500 XP total</span>
+      </div>
+      <div class="mode-prog-bar">
+        <div class="mode-prog-label"><span id="sp-prog-label">0/5 missions complete</span><span id="sp-prog-pct">0%</span></div>
+        <div class="mode-prog-bg"><div class="mode-prog-fill" id="sp-prog-fill" style="width:0%"></div></div>
       </div>
     </div>
     <div class="episodes-grid" id="space-episodes"></div>
   </div>
 
-  <!-- DUNGEON -->
   <div class="mode-section" id="mode-dungeon" style="display:none">
     <div class="mode-banner dungeon">
       <div class="mode-banner-icon">⚔️</div>
       <h2>SQL Dungeon: The Cursed Archive</h2>
-      <p>Beneath the Archivist's Tower lies the Cursed Archive — a dungeon where ancient data creatures guard forbidden knowledge. Descend floor by floor, each monster a SQL challenge harder than the last. Only the player who masters recursive queries can claim the Legendary Key and escape.</p>
+      <p>Descend floor by floor through the Cursed Archive. Each monster is a SQL challenge harder than the last. Master recursive queries to claim the Legendary Key.</p>
       <div class="mode-banner-meta">
         <span class="meta-chip">7 Floors</span>
-        <span class="meta-chip">+700 XP total</span>
-        <span class="meta-chip">All SQL Levels · Recursive CTEs</span>
+        <span class="meta-chip" id="dun-xp-meta">+700 XP total</span>
+      </div>
+      <div class="mode-prog-bar">
+        <div class="mode-prog-label"><span id="dun-prog-label">0/7 floors cleared</span><span id="dun-prog-pct">0%</span></div>
+        <div class="mode-prog-bg"><div class="mode-prog-fill" id="dun-prog-fill" style="width:0%"></div></div>
       </div>
     </div>
     <div class="episodes-grid" id="dungeon-episodes"></div>
@@ -118,66 +126,109 @@
 
 <footer class="footer">
   <div class="footer-logo">⬡ QueryQuest</div>
-  <p class="footer-sub">Adventure Mode — Story-driven SQL challenges</p>
-  <div class="footer-links">
-    <a href="challenges.html">Standard Challenges</a>
-    <a href="leaderboard.html">Leaderboard</a>
-  </div>
+  <div class="footer-links"><a href="challenges.html">Standard Challenges</a><a href="leaderboard.html">Leaderboard</a></div>
 </footer>
 
 <script src="../js/main.js"></script>
 <script src="../js/nav-inject.js"></script>
 <script src="../data/adventure-data.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    buildNav('adventures');
-    renderEpisodes();
+document.addEventListener('DOMContentLoaded', async () => {
+  buildNav('adventures');
 
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get('mode');
-    if (mode) {
-      const tab = document.querySelector(`.mode-tab[onclick*="${mode}"]`);
-      if (tab) showMode(mode, tab);
-    }
-  });
+  // FIX 2: always restore progress from server before rendering locks
+  await QQ.restoreSession();
 
-  function showMode(mode, btn) {
-    document.querySelectorAll('.mode-section').forEach(s => s.style.display = 'none');
-    document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
-    document.getElementById('mode-' + mode).style.display = 'block';
-    btn.classList.add('active');
+  renderAll();
+
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode');
+  if (mode) {
+    const tab = document.querySelector(`.mode-tab[onclick*="${mode}"]`);
+    if (tab) showMode(mode, tab);
   }
+});
 
-  function renderEpisodes() {
-    const progress = QQ.getProgress();
-    const user = QQ.getUser();
-    const userXP = user ? (user.xp || 0) : 999;
+function showMode(mode, btn) {
+  document.querySelectorAll('.mode-section').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('mode-' + mode).style.display = 'block';
+  btn.classList.add('active');
+}
 
-    ['detective', 'space', 'dungeon'].forEach(mode => {
-      const container = document.getElementById(mode + '-episodes');
-      const episodes = ADVENTURE_DATA[mode];
-      if (!container || !episodes) return;
+function renderAll() {
+  const progress = QQ.getProgress();
+  const prefixMap = { detective:'det', space:'sp', dungeon:'dun' };
+  const labelMap  = { detective:'cases solved', space:'missions complete', dungeon:'floors cleared' };
 
-      episodes.forEach((ep, idx) => {
-        const solved = progress[ep.id]?.solved;
-        const locked = idx > 0 && !progress[episodes[idx-1].id]?.solved;
-        const card = document.createElement('a');
-        card.href = locked ? '#' : `adventure-play.html?id=${ep.id}`;
-        card.className = `episode-card${solved ? ' solved' : ''}${locked ? ' ep-locked' : ''}`;
-        card.innerHTML = `
-          <div class="ep-num">${mode.toUpperCase()} · CASE ${String(idx+1).padStart(2,'0')}</div>
-          <div class="ep-title">${locked ? '🔒 ' : ''}${ep.title}</div>
-          <div class="ep-story">${ep.story}</div>
-          <div class="ep-footer">
-            <div class="ep-concepts">${ep.concepts.slice(0,3).map(c=>`<span>${c}</span>`).join('')}</div>
+  ['detective','space','dungeon'].forEach(mode => {
+    const container = document.getElementById(mode + '-episodes');
+    const episodes  = ADVENTURE_DATA[mode];
+    if (!container || !episodes) return;
+    container.innerHTML = '';
+
+    const totalXP  = episodes.reduce((s,ep) => s + ep.xp, 0);
+    const solvedN  = episodes.filter(ep => progress[ep.id]?.solved).length;
+    const pct      = episodes.length ? Math.round((solvedN / episodes.length) * 100) : 0;
+    const prefix   = prefixMap[mode];
+
+    // Update banner progress
+    const progLabel = document.getElementById(prefix + '-prog-label');
+    const progPct   = document.getElementById(prefix + '-prog-pct');
+    const progFill  = document.getElementById(prefix + '-prog-fill');
+    const xpMeta    = document.getElementById(prefix + '-xp-meta');
+    if (progLabel) progLabel.textContent = `${solvedN}/${episodes.length} ${labelMap[mode]}`;
+    if (progPct)   progPct.textContent   = pct + '%';
+    if (progFill)  progFill.style.width  = pct + '%';
+    if (xpMeta)    xpMeta.textContent    = `+${totalXP} XP total`;
+
+    episodes.forEach((ep, idx) => {
+      const solved = !!progress[ep.id]?.solved;
+
+      // FIX 2: LOCKING LOGIC
+      // Episode 0 is ALWAYS available (never locked)
+      // Episode N is available if episode N-1 is solved OR episode N itself is already solved
+      // This means: if you somehow solved ep3 without ep1, ep1 is still available
+      const locked = idx > 0
+        && !progress[episodes[idx - 1].id]?.solved
+        && !solved; // if THIS one is already solved, never lock it
+
+      const card = document.createElement('a');
+      card.href = locked ? '#' : `adventure-play.html?id=${ep.id}`;
+
+      let cardClass = 'episode-card';
+      if (solved)       cardClass += ' solved';
+      else if (locked)  cardClass += ' ep-locked';
+      else              cardClass += ' ep-available';
+      card.className = cardClass;
+
+      const statusText = solved ? '✓ Complete'
+        : locked ? '🔒 Complete previous first'
+        : idx === 0 ? '▶ Start here'
+        : '▶ Available';
+
+      card.innerHTML = `
+        <div class="ep-num">${mode.toUpperCase()} · ${String(idx+1).padStart(2,'0')}</div>
+        <div class="ep-title">${ep.title}</div>
+        <div class="ep-story">${ep.story}</div>
+        <div class="ep-footer">
+          <div class="ep-concepts">${ep.concepts.slice(0,3).map(c=>`<span>${c}</span>`).join('')}</div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
             <div class="ep-xp">+${ep.xp} XP</div>
+            <div class="ep-status" style="color:${solved?'var(--accent3)':locked?'var(--text-dim)':'var(--accent)'}">${statusText}</div>
           </div>
-        `;
-        if (locked) card.addEventListener('click', e => { e.preventDefault(); alert('Complete the previous case first!'); });
-        container.appendChild(card);
-      });
+        </div>`;
+
+      if (locked) {
+        card.addEventListener('click', e => {
+          e.preventDefault();
+          alert(`Complete "${episodes[idx-1].title}" first to unlock this episode.`);
+        });
+      }
+      container.appendChild(card);
     });
-  }
+  });
+}
 </script>
 </body>
 </html>
