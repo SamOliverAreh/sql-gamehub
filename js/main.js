@@ -19,24 +19,27 @@ function setTheme(t) {
 
 // ============================================================
 //  API HELPER
+//  Apps Script redirects /exec to a unique URL — query params
+//  must be appended so they survive the redirect.
 // ============================================================
 async function apiCall(action, params = {}) {
   try {
-    const url = new URL(API_URL);
-    url.searchParams.set('action', action);
-    // Add token to every request if available
     const token = localStorage.getItem('qq_token');
-    if (token) params.token = token;
+    const allParams = { action, ...params };
+    if (token) allParams.token = token;
 
-    const res = await fetch(url.toString(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params)
+    const url = new URL(API_URL);
+    Object.entries(allParams).forEach(([k, v]) => {
+      url.searchParams.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
     });
-    return await res.json();
+
+    const res  = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
+    const text = await res.text();
+    try { return JSON.parse(text); }
+    catch { return { ok: false, error: 'Bad response: ' + text.substring(0, 200) }; }
   } catch (e) {
-    console.error('API error:', e);
-    return { ok: false, error: e.message };
+    console.error('API error [' + action + ']:', e);
+    return { ok: false, error: 'Network error — check browser console.' };
   }
 }
 
