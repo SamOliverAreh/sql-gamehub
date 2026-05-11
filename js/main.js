@@ -23,23 +23,38 @@ function setTheme(t) {
 //  must be appended so they survive the redirect.
 // ============================================================
 async function apiCall(action, params = {}) {
+  // Apps Script redirects strip query params — use iframe trick instead:
+  // We write a hidden form into a sandboxed iframe, submit it, and
+  // read the response via a fetch to the same URL with no-cors fallback.
+  // Simplest reliable method: fetch with no-cors returns opaque response,
+  // so we use a two-step: fire-and-forget for writes, plain fetch for reads.
   try {
     const token = localStorage.getItem('qq_token');
     const allParams = { action, ...params };
     if (token) allParams.token = token;
 
-    const url = new URL(API_URL);
+    // Build form body — Apps Script reads these as e.parameter on POST
+    const formData = new FormData();
     Object.entries(allParams).forEach(([k, v]) => {
-      url.searchParams.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+      formData.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
     });
 
-    const res  = await fetch(url.toString(), { method: 'GET', redirect: 'follow' });
-    const text = await res.text();
-    try { return JSON.parse(text); }
-    catch { return { ok: false, error: 'Bad response: ' + text.substring(0, 200) }; }
+    // Use XMLHttpRequest which handles Apps Script redirects correctly
+    return await new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', API_URL, true);
+      xhr.onload = function() {
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch { resolve({ ok: false, error: 'Bad response: ' + xhr.responseText.substring(0, 200) }); }
+      };
+      xhr.onerror = function() {
+        resolve({ ok: false, error: 'Network error — check browser console.' });
+      };
+      xhr.send(formData);
+    });
   } catch (e) {
     console.error('API error [' + action + ']:', e);
-    return { ok: false, error: 'Network error — check browser console.' };
+    return { ok: false, error: 'Network error: ' + e.message };
   }
 }
 
