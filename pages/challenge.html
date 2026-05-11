@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="../css/main.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"/>
   <style>
     body { padding-top: 70px; }
     .challenge-layout { max-width: 1200px; margin: 0 auto; padding: 32px 16px; display: grid; grid-template-columns: 360px 1fr; gap: 20px; position: relative; z-index: 1; }
@@ -208,11 +207,16 @@ function renderTable(cols,vals) {
   document.getElementById('resultsBody').innerHTML=h;
 }
 function showError(msg){document.getElementById('resultsLabel').textContent='✗ ERROR';document.getElementById('resultsBody').innerHTML=`<div class="error-out">⚠ ${msg}</div>`;}
-function handleSuccess(){
-  const already=QQ.isSolved(currentChallenge.id);
-  if(!already){QQ.saveProgress(currentChallenge.id,{solved:true});const u=QQ.getUser();if(u)QQ.addXP(currentChallenge.xp);document.getElementById('solvedBadge').innerHTML='<span class="badge badge-rookie">✓ Solved</span>';}
-  document.getElementById('successXP').textContent=already?'Already solved!':'+'+currentChallenge.xp+' XP';
-  document.getElementById('successMsg').textContent=already?'Great work, already solved this one!':'Expected: '+currentChallenge.expectedNote;
+async function handleSuccess(){
+  const already = QQ.isSolved(currentChallenge.id);
+  if (!already) {
+    // Save to server + local
+    await QQ.saveProgress(currentChallenge.id);
+    await QQ.addXP(currentChallenge.xp);
+    document.getElementById('solvedBadge').innerHTML = '<span class="badge badge-rookie">✓ Solved</span>';
+  }
+  document.getElementById('successXP').textContent = already ? 'Already solved!' : '+' + currentChallenge.xp + ' XP';
+  document.getElementById('successMsg').textContent = already ? 'Great work, already solved this one!' : 'Expected: ' + currentChallenge.expectedNote;
   document.getElementById('successOverlay').classList.add('show');
 }
 function closeSuccess(){document.getElementById('successOverlay').classList.remove('show');}
