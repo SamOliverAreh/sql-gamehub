@@ -129,14 +129,15 @@ function getProgress() {
 }
 
 async function saveProgress(id) {
-  // 1. Update local cache immediately (fast UI)
+  // 1. Ask server first — server is the source of truth
+  const r = await apiCall('saveProgress', { challengeId: id });
+  // 2. Update local cache to match
   const p = getProgress();
   if (!p[id]) {
     p[id] = { solved: true, solvedAt: Date.now() };
     localStorage.setItem('qq_progress', JSON.stringify(p));
   }
-  // 2. Sync to server
-  const r = await apiCall('saveProgress', { challengeId: id });
+  // r.alreadySolved = true means server already had this record
   return r;
 }
 
