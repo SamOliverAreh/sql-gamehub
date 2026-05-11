@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="../css/main.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"/>
   <style>
     body { padding-top: 70px; }
     .adv-layout { max-width: 1200px; margin: 0 auto; padding: 32px 16px; display: grid; grid-template-columns: 380px 1fr; gap: 20px; position: relative; z-index: 1; }
@@ -177,7 +176,7 @@ SELECT </textarea>
 
   // CodeMirror
   const editor = CodeMirror.fromTextArea(document.getElementById('sqlEditor'), {
-    mode: 'text/x-sql', theme: 'dracula', lineNumbers: true,
+    mode: 'text/x-sql', theme: "default", lineNumbers: true,
     extraKeys: { 'Ctrl-Enter': runQuery, 'Cmd-Enter': runQuery }
   });
 
@@ -264,19 +263,18 @@ SELECT </textarea>
     document.getElementById('resultsBody').innerHTML = `<div class="error-out">⚠ ${msg}</div>`;
   }
 
-  function handleSuccess() {
+  async function handleSuccess() {
     const already = QQ.isSolved(currentEp.id);
     if (!already) {
-      QQ.saveProgress(currentEp.id, { solved: true });
-      const user = QQ.getUser();
-      if (user) QQ.addXP(currentEp.xp);
+      await QQ.saveProgress(currentEp.id);
+      await QQ.addXP(currentEp.xp);
     }
-    const icons = { detective: '🔍', space: '🚀', dungeon: '⚔️' };
-    const titles = { detective: 'Case Solved!', space: 'Mission Complete!', dungeon: 'Monster Defeated!' };
-    document.getElementById('successIcon').textContent = icons[currentEp.mode] || '🎉';
+    const icons  = { detective:'🔍', space:'🚀', dungeon:'⚔️' };
+    const titles = { detective:'Case Solved!', space:'Mission Complete!', dungeon:'Monster Defeated!' };
+    document.getElementById('successIcon').textContent  = icons[currentEp.mode]  || '🎉';
     document.getElementById('successTitle').textContent = titles[currentEp.mode] || 'Complete!';
-    document.getElementById('successXP').textContent = already ? 'Already solved!' : `+${currentEp.xp} XP`;
-    document.getElementById('successMsg').textContent = already ? 'Well done again, detective.' : `Excellent SQL work! ${currentEp.expectedNote}`;
+    document.getElementById('successXP').textContent    = already ? 'Already solved!' : `+${currentEp.xp} XP`;
+    document.getElementById('successMsg').textContent   = already ? 'Well done again!' : `Excellent SQL! ${currentEp.expectedNote}`;
     document.getElementById('successOverlay').classList.add('show');
   }
 
