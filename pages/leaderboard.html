@@ -59,7 +59,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   buildNav('leaderboard');
-  render();
+  // FIX 1: fetch live leaderboard from server — same data source as dashboard rank
+  QQ.fetchLeaderboard().then(() => render());
 });
 function render() {
   const user = QQ.getUser();
