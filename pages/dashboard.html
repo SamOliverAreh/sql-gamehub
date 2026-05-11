@@ -9,28 +9,51 @@
   <style>
     body { padding-top: 70px; }
     .dash-wrap { max-width: 1000px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
-    .dash-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 36px; flex-wrap: wrap; }
-    .dash-welcome h1 { font-size: clamp(1.3rem,4vw,1.8rem); }
-    .dash-welcome p { color: var(--text-muted); margin-top: 4px; font-size: 0.86rem; }
-    .tier-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; flex-wrap: wrap; }
-    .tier-row.active { border-color: var(--accent); background: rgba(0,212,255,0.04); }
-    .tier-icon { font-size: 1.4rem; min-width: 32px; text-align: center; }
-    .tier-info { flex: 1; min-width: 120px; }
-    .tier-name { font-family: var(--font-display); font-size: 0.82rem; }
-    .tier-meta { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
-    .tier-status { font-family: var(--font-mono); font-size: 0.7rem; white-space: nowrap; }
-    .tier-status.unlocked { color: var(--accent3); }
-    .tier-status.locked-dim { color: var(--text-dim); }
-    .recent-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .recent-header h2 { font-size: 1rem; }
-    .recent-list { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .recent-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
-    .recent-item:last-child { border-bottom: none; }
-    .recent-title { font-size: 0.86rem; }
-    .recent-meta { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); }
-    .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
-    .empty-state p { margin-bottom: 16px; font-size: 0.88rem; }
-    .section-gap { margin-bottom: 40px; }
+    .dash-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:32px; flex-wrap:wrap; }
+    .dash-welcome h1 { font-size:clamp(1.3rem,4vw,1.8rem); }
+    .dash-welcome p { color:var(--text-muted); margin-top:4px; font-size:0.86rem; }
+    /* FIX 3: tier text badge — no emoji, just text label */
+    .stat-card-tier { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); letter-spacing:0.05em; }
+    /* Tier rows */
+    .tier-row { display:flex; align-items:center; gap:14px; padding:13px 16px; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; flex-wrap:wrap; }
+    .tier-row.active { border-color:var(--accent); background:rgba(0,212,255,0.04); }
+    .tier-badge-label { font-family:var(--font-display); font-size:0.72rem; padding:3px 10px; border-radius:99px; min-width:80px; text-align:center; }
+    .tier-info { flex:1; min-width:120px; }
+    .tier-name-text { font-family:var(--font-display); font-size:0.82rem; }
+    .tier-meta { font-family:var(--font-mono); font-size:0.67rem; color:var(--text-muted); margin-top:2px; }
+    .tier-status { font-family:var(--font-mono); font-size:0.7rem; white-space:nowrap; }
+    .tier-status.unlocked { color:var(--accent3); }
+    .tier-status.locked-dim { color:var(--text-dim); }
+    /* Progress bars inside tier rows */
+    .tier-bar-wrap { width:100%; margin-top:6px; }
+    .tier-bar-bg { height:4px; background:var(--bg-secondary); border-radius:99px; overflow:hidden; }
+    .tier-bar-fill { height:100%; background:var(--accent); border-radius:99px; transition:width 0.8s ease; }
+    /* Adventure progress */
+    .adv-section { margin-bottom:40px; }
+    .adv-progress-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+    .adv-prog-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:18px; }
+    .adv-prog-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .adv-prog-icon { font-size:1.5rem; }
+    .adv-prog-title { font-family:var(--font-display); font-size:0.82rem; }
+    .adv-prog-count { font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); margin-top:2px; }
+    .adv-prog-bar-bg { height:6px; background:var(--bg-secondary); border-radius:99px; overflow:hidden; margin-bottom:8px; }
+    .adv-prog-bar-fill { height:100%; border-radius:99px; transition:width 0.8s ease; }
+    .adv-prog-bar-fill.detective { background:#f59e0b; }
+    .adv-prog-bar-fill.space     { background:#7c3aed; }
+    .adv-prog-bar-fill.dungeon   { background:#ef4444; }
+    .adv-prog-xp { font-family:var(--font-mono); font-size:0.68rem; color:var(--accent3); }
+    /* Recent */
+    .recent-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .recent-header h2 { font-size:1rem; }
+    .recent-list { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    .recent-item { display:flex; align-items:center; justify-content:space-between; padding:11px 16px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:6px; }
+    .recent-item:last-child { border-bottom:none; }
+    .recent-title { font-size:0.84rem; }
+    .recent-meta { font-family:var(--font-mono); font-size:0.68rem; color:var(--text-muted); }
+    .empty-state { text-align:center; padding:36px; color:var(--text-muted); }
+    .empty-state p { margin-bottom:14px; font-size:0.86rem; }
+    .sec-title { font-family:var(--font-display); font-size:0.95rem; margin-bottom:14px; margin-top:36px; letter-spacing:0.05em; }
+    .loading-overlay { display:flex; align-items:center; justify-content:center; padding:60px; color:var(--text-muted); font-family:var(--font-mono); font-size:0.82rem; gap:10px; }
   </style>
 </head>
 <body>
@@ -40,30 +63,45 @@
 <div class="nav-mobile-menu" id="navMobileMenu"></div>
 
 <div class="dash-wrap">
+  <!-- Header -->
   <div class="dash-header">
     <div class="dash-welcome">
-      <h1>Welcome back, <span class="accent" id="dashUsername"></span></h1>
-      <p id="dashMeta">Loading...</p>
+      <h1>Welcome back, <span class="accent" id="dashUsername">...</span></h1>
+      <p id="dashMeta">Loading your profile...</p>
     </div>
     <a href="challenges.html" class="btn-primary">Continue →</a>
   </div>
 
-  <div class="xp-bar-wrap">
+  <!-- XP Bar -->
+  <div class="xp-bar-wrap" style="margin-bottom:32px;">
     <div class="xp-bar-label"><span id="xpLabel">0 XP</span><span id="xpNextLabel"></span></div>
     <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpFill" style="width:0%"></div></div>
   </div>
 
-  <div class="stat-cards section-gap">
+  <!-- Stat cards — FIX 1: rank from leaderboard page (same source), FIX 3: tier as text -->
+  <div class="stat-cards" style="margin-bottom:36px;">
     <div class="stat-card"><div class="stat-card-num" id="sXP">0</div><div class="stat-card-label">Total XP</div></div>
     <div class="stat-card"><div class="stat-card-num" id="sSolved">0</div><div class="stat-card-label">Challenges Solved</div></div>
     <div class="stat-card"><div class="stat-card-num" id="sRank">#—</div><div class="stat-card-label">Leaderboard Rank</div></div>
-    <div class="stat-card"><div class="stat-card-num" id="sTier">🌱</div><div class="stat-card-label">Current Tier</div></div>
+    <!-- FIX 3: show tier NAME not emoji -->
+    <div class="stat-card"><div class="stat-card-num stat-card-tier" id="sTier">Rookie</div><div class="stat-card-label">Current Tier</div></div>
   </div>
 
-  <h2 style="font-size:1rem;margin-bottom:14px;" class="section-gap">Tier Progress</h2>
-  <div id="tierProgress" class="section-gap"></div>
+  <!-- Tier Progress -->
+  <div class="sec-title">📊 Tier Progress</div>
+  <div id="tierProgress" style="margin-bottom:36px;"></div>
 
-  <div class="recent-header"><h2>Recent Solves</h2><a href="challenges.html" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--accent);text-decoration:none;">All challenges →</a></div>
+  <!-- FIX 5: Adventure Progress -->
+  <div class="adv-section">
+    <div class="sec-title">🗺️ Adventure Progress</div>
+    <div class="adv-progress-grid" id="advProgress"></div>
+  </div>
+
+  <!-- Recent Solves -->
+  <div class="recent-header">
+    <h2 class="sec-title" style="margin:0;">🕹️ Recent Solves</h2>
+    <a href="challenges.html" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--accent);text-decoration:none;">All →</a>
+  </div>
   <div class="recent-list" id="recentList"></div>
 </div>
 
@@ -72,61 +110,143 @@
 <script src="../data/challenges.js"></script>
 <script src="../data/adventure-data.js"></script>
 <script>
-const user = QQ.getUser();
-if (!user) window.location.href = 'login.html';
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   buildNav('dashboard');
-  render();
+
+  // FIX: always restore from server first so XP/rank are accurate
+  const user = await QQ.restoreSession();
+  if (!user) { window.location.href = 'login.html'; return; }
+
+  // FIX 1: fetch live leaderboard so rank matches leaderboard page
+  await QQ.fetchLeaderboard();
+
+  render(user);
 });
 
-function render() {
-  document.getElementById('dashUsername').textContent = user.username;
-  document.getElementById('dashMeta').textContent = `Tier: ${user.level||'Rookie'} · Joined ${new Date(user.joinedAt).toLocaleDateString()}`;
-  const xp = user.xp || 0;
+function render(user) {
+  const xp       = user.xp || 0;
+  const level    = user.level || 'Rookie';
   const progress = QQ.getProgress();
-  const solved = Object.values(progress).filter(p=>p.solved).length;
+
+  document.getElementById('dashUsername').textContent = user.username;
+  document.getElementById('dashMeta').textContent =
+    `Tier: ${level} · Joined ${new Date(user.joinedAt).toLocaleDateString()}`;
+
+  // Stat cards
+  const allSolved = Object.values(progress).filter(p => p.solved);
   document.getElementById('sXP').textContent = xp;
-  document.getElementById('sSolved').textContent = solved;
-  const board = JSON.parse(localStorage.getItem('qq_leaderboard')||'[]');
-  const rank = board.findIndex(e=>e.username===user.username)+1;
-  document.getElementById('sRank').textContent = rank>0?'#'+rank:'#—';
-  const tierObj = TIERS.find(t=>t.name===(user.level||'Rookie'))||TIERS[0];
-  document.getElementById('sTier').textContent = tierObj.icon;
+  document.getElementById('sSolved').textContent = allSolved.length;
+
+  // FIX 1: rank from same leaderboard data as leaderboard page
+  const rank = QQ.getLocalRank(user.username);
+  document.getElementById('sRank').textContent = rank ? '#' + rank : '#—';
+
+  // FIX 3: tier name as text
+  document.getElementById('sTier').textContent = level;
 
   // XP bar
-  const tidx = TIERS.findIndex(t=>t.name===(user.level||'Rookie'));
-  const curMin = TIERS[tidx]?.minXP||0;
-  const nextT = TIERS[tidx+1];
-  const pct = nextT ? Math.min(((xp-curMin)/(nextT.minXP-curMin))*100,100) : 100;
-  document.getElementById('xpFill').style.width = pct+'%';
-  document.getElementById('xpLabel').textContent = xp+' XP';
-  document.getElementById('xpNextLabel').textContent = nextT ? `Next: ${nextT.name} (${nextT.minXP} XP)` : '🏆 Max tier reached!';
+  const tidx  = TIERS.findIndex(t => t.name === level);
+  const curMin = TIERS[tidx]?.minXP || 0;
+  const nextT  = TIERS[tidx + 1];
+  const pct    = nextT ? Math.min(((xp - curMin) / (nextT.minXP - curMin)) * 100, 100) : 100;
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpLabel').textContent = xp + ' XP';
+  document.getElementById('xpNextLabel').textContent = nextT
+    ? `Next: ${nextT.name} (${nextT.minXP} XP)`
+    : '🏆 Max tier reached!';
 
-  // Tier rows
+  // Tier rows with mini progress bars
   const tp = document.getElementById('tierProgress');
+  tp.innerHTML = '';
   TIERS.forEach(tier => {
-    const tc = CHALLENGES_DATA.filter(c=>c.tierName===tier.name);
-    const ts = tc.filter(c=>progress[c.id]?.solved).length;
-    const active = tier.name===(user.level||'Rookie');
+    const tc       = CHALLENGES_DATA.filter(c => c.tierName === tier.name);
+    const ts       = tc.filter(c => progress[c.id]?.solved).length;
+    const active   = tier.name === level;
     const unlocked = xp >= tier.minXP;
-    tp.innerHTML += `<div class="tier-row ${active?'active':''}">
-      <div class="tier-icon">${unlocked?tier.icon:'🔒'}</div>
-      <div class="tier-info"><div class="tier-name">${tier.name}</div><div class="tier-meta">${tc.length} challenges · ${tier.minXP} XP required</div></div>
-      <div class="tier-status ${unlocked?'unlocked':'locked-dim'}">${unlocked?ts+'/'+tc.length+' solved':'Locked'}</div>
-    </div>`;
+    const barPct   = tc.length ? Math.round((ts / tc.length) * 100) : 0;
+
+    // Tier badge colours
+    const badgeColors = {
+      Rookie:'#10b981',Amateur:'#3b82f6',Skilled:'#f59e0b',
+      Advanced:'#7c3aed',Expert:'#ef4444',Legendary:'#00d4ff'
+    };
+    const col = badgeColors[tier.name] || 'var(--accent)';
+
+    tp.innerHTML += `
+      <div class="tier-row ${active ? 'active' : ''}">
+        <div class="tier-badge-label" style="background:${col}22;border:1px solid ${col}55;color:${col};">
+          ${tier.name}
+        </div>
+        <div class="tier-info">
+          <div class="tier-name-text">${tier.name}${active ? ' ← current' : ''}</div>
+          <div class="tier-meta">${tc.length} challenges · ${tier.minXP} XP to unlock</div>
+          ${unlocked ? `<div class="tier-bar-wrap"><div class="tier-bar-bg"><div class="tier-bar-fill" style="width:${barPct}%"></div></div></div>` : ''}
+        </div>
+        <div class="tier-status ${unlocked ? 'unlocked' : 'locked-dim'}">
+          ${unlocked ? `${ts}/${tc.length} (${barPct}%)` : '🔒 Locked'}
+        </div>
+      </div>`;
   });
 
-  // Recent solves
+  // FIX 5: Adventure progress section
+  const advConfig = [
+    { key:'detective', icon:'🔍', label:'Detective Agency', color:'detective' },
+    { key:'space',     icon:'🚀', label:'Space Explorer',   color:'space'     },
+    { key:'dungeon',   icon:'⚔️', label:'SQL Dungeon',      color:'dungeon'   }
+  ];
+  const advDiv = document.getElementById('advProgress');
+  advDiv.innerHTML = '';
+  advConfig.forEach(cfg => {
+    const eps      = ADVENTURE_DATA[cfg.key] || [];
+    const solved   = eps.filter(ep => progress[ep.id]?.solved).length;
+    const total    = eps.length;
+    const pctAdv   = total ? Math.round((solved / total) * 100) : 0;
+    const totalXP  = eps.reduce((s, ep) => s + ep.xp, 0);
+    const earnedXP = eps.filter(ep => progress[ep.id]?.solved).reduce((s, ep) => s + ep.xp, 0);
+    advDiv.innerHTML += `
+      <div class="adv-prog-card">
+        <div class="adv-prog-header">
+          <div class="adv-prog-icon">${cfg.icon}</div>
+          <div>
+            <div class="adv-prog-title">${cfg.label}</div>
+            <div class="adv-prog-count">${solved}/${total} episodes · ${pctAdv}%</div>
+          </div>
+        </div>
+        <div class="adv-prog-bar-bg">
+          <div class="adv-prog-bar-fill ${cfg.color}" style="width:${pctAdv}%"></div>
+        </div>
+        <div class="adv-prog-xp">⚡ ${earnedXP} / ${totalXP} XP earned</div>
+      </div>`;
+  });
+
+  // Recent solves (challenges + adventures combined)
   const rl = document.getElementById('recentList');
-  const recent = Object.entries(progress).filter(([,v])=>v.solved).sort((a,b)=>b[1].solvedAt-a[1].solvedAt).slice(0,6);
-  if (!recent.length) {
-    rl.innerHTML='<div class="empty-state"><p>No challenges solved yet.</p><a href="challenges.html" class="btn-primary">Start Now →</a></div>';
+  // Build combined lookup
+  const allChallenges = [
+    ...CHALLENGES_DATA,
+    ...Object.values(ADVENTURE_DATA).flat()
+  ];
+  const recentSolves = Object.entries(progress)
+    .filter(([, v]) => v.solved)
+    .sort((a, b) => (b[1].solvedAt || 0) - (a[1].solvedAt || 0))
+    .slice(0, 8);
+
+  if (!recentSolves.length) {
+    rl.innerHTML = '<div class="empty-state"><p>No challenges solved yet.</p><a href="challenges.html" class="btn-primary">Start Now →</a></div>';
   } else {
-    recent.forEach(([id])=>{
-      const ch = CHALLENGES_DATA.find(c=>c.id===id);
+    recentSolves.forEach(([id]) => {
+      const ch = allChallenges.find(c => c.id === id);
       if (!ch) return;
-      rl.innerHTML+=`<div class="recent-item"><div><div class="recent-title">${ch.title}</div><div class="recent-meta">${ch.tierName} · +${ch.xp} XP</div></div><span class="badge badge-${ch.tierName.toLowerCase()}">✓ Solved</span></div>`;
+      const tierLabel = ch.tierName || ch.mode || '?';
+      const badgeClass = ch.mode ? `badge-${ch.mode}` : `badge-${tierLabel.toLowerCase()}`;
+      rl.innerHTML += `
+        <div class="recent-item">
+          <div>
+            <div class="recent-title">${ch.title}</div>
+            <div class="recent-meta">${tierLabel} · +${ch.xp} XP</div>
+          </div>
+          <span class="badge ${badgeClass}">✓ Solved</span>
+        </div>`;
     });
   }
 }
