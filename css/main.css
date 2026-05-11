@@ -458,3 +458,66 @@ h1,h2,h3,h4 { font-family: var(--font-display); letter-spacing: 0.05em; }
   .top3 { grid-template-columns: 1fr; }
   .stat-cards { grid-template-columns: 1fr 1fr; }
 }
+
+/* ===== CODEMIRROR FIXES =====
+   FIX 4: fixed height, no expansion, light mode support
+*/
+.CodeMirror {
+  height: 200px !important;
+  max-height: 200px !important;
+  font-size: 0.84rem !important;
+  font-family: var(--font-mono) !important;
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border: none !important;
+  /* Prevent the editor from pushing layout */
+  overflow: hidden !important;
+}
+.CodeMirror-scroll {
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  background: var(--bg-card) !important;
+}
+.CodeMirror-gutters {
+  background: var(--bg-secondary) !important;
+  border-right: 1px solid var(--border) !important;
+}
+.CodeMirror-linenumber {
+  color: var(--text-dim) !important;
+}
+.CodeMirror-cursor {
+  border-left-color: var(--accent) !important;
+}
+/* Selected text */
+.CodeMirror-selected { background: rgba(0,212,255,0.15) !important; }
+
+/* FIX 4: Light mode — override dracula theme colours */
+[data-theme="light"] .CodeMirror {
+  background: #f8faff !important;
+  color: #1a2540 !important;
+}
+[data-theme="light"] .CodeMirror-scroll {
+  background: #f8faff !important;
+}
+[data-theme="light"] .CodeMirror-gutters {
+  background: #edf1fa !important;
+  border-right-color: var(--border) !important;
+}
+[data-theme="light"] .CodeMirror-linenumber { color: #8fa4bf !important; }
+[data-theme="light"] .CodeMirror-cursor { border-left-color: var(--accent) !important; }
+/* Syntax tokens in light mode */
+[data-theme="light"] .cm-keyword  { color: #0066aa !important; font-weight: 600; }
+[data-theme="light"] .cm-string   { color: #047857 !important; }
+[data-theme="light"] .cm-number   { color: #b45309 !important; }
+[data-theme="light"] .cm-comment  { color: #6b7c95 !important; font-style: italic; }
+[data-theme="light"] .cm-variable { color: #1a2540 !important; }
+[data-theme="light"] .cm-operator { color: #5b21b6 !important; }
+[data-theme="light"] .cm-def      { color: #0077bb !important; }
+[data-theme="light"] .CodeMirror-selected { background: rgba(0,111,168,0.15) !important; }
+
+/* Mobile: slightly shorter editor */
+@media (max-width: 640px) {
+  .CodeMirror,
+  .CodeMirror-scroll { height: 160px !important; max-height: 160px !important; }
+}
