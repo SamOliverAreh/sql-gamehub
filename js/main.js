@@ -1,8 +1,14 @@
-// main.js — Shared utilities: auth, XP, progress
-// Theme toggle + hamburger are handled entirely by nav-inject.js
+// ============================================================
+//  main.js — QueryQuest core utilities
+//  Backend: Google Sheets via Apps Script
+// ============================================================
 
-// ===== THEME =====
-// Applied immediately by nav-inject.js IIFE — no flash
+const API_URL = 'https://script.google.com/macros/s/AKfycbyKjgcygxAuz9FzEgCTA-51rmWIpn9L9kZcpWcUxojceubeyoD90S_-0Bp6vM56NzlC-w/exec';
+// ^^^ Replace YOUR_DEPLOYMENT_ID after deploying Code.gs
+
+// ============================================================
+//  THEME
+// ============================================================
 function getTheme() { return localStorage.getItem('qq_theme') || 'dark'; }
 function setTheme(t) {
   localStorage.setItem('qq_theme', t);
@@ -11,40 +17,139 @@ function setTheme(t) {
   if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
 }
 
-// ===== AUTH =====
+// ============================================================
+//  API HELPER
+// ============================================================
+async function apiCall(action, params = {}) {
+  try {
+    const url = new URL(API_URL);
+    url.searchParams.set('action', action);
+    // Add token to every request if available
+    const token = localStorage.getItem('qq_token');
+    if (token) params.token = token;
+
+    const res = await fetch(url.toString(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    return await res.json();
+  } catch (e) {
+    console.error('API error:', e);
+    return { ok: false, error: e.message };
+  }
+}
+
+// ============================================================
+//  AUTH
+// ============================================================
 function getUser() {
   try { return JSON.parse(localStorage.getItem('qq_user')) || null; }
   catch { return null; }
 }
 function setUser(u) { localStorage.setItem('qq_user', JSON.stringify(u)); }
-function logout() {
+
+async function register(username, email, password) {
+  const r = await apiCall('register', { username, email, password });
+  if (r.ok) {
+    localStorage.setItem('qq_token', r.token);
+    setUser(r.user);
+    updateLocalLeaderboard(r.user);
+  }
+  return r;
+}
+
+async function login(username, password) {
+  const r = await apiCall('login', { username, password });
+  if (r.ok) {
+    localStorage.setItem('qq_token', r.token);
+    setUser(r.user);
+    // Also restore progress from server
+    const prog = await apiCall('getProgress');
+    if (prog.ok) localStorage.setItem('qq_progress', JSON.stringify(prog.progress));
+    updateLocalLeaderboard(r.user);
+  }
+  return r;
+}
+
+async function logout() {
+  const token = localStorage.getItem('qq_token');
+  if (token) await apiCall('logout', { token });
+  localStorage.removeItem('qq_token');
   localStorage.removeItem('qq_user');
+  localStorage.removeItem('qq_progress');
   const inPages = window.location.pathname.includes('/pages/');
   window.location.href = inPages ? '../index.html' : 'index.html';
 }
 
-// ===== PROGRESS =====
+// Restore session on page load (refresh user data from server)
+async function restoreSession() {
+  const token = localStorage.getItem('qq_token');
+  if (!token) return null;
+  const r = await apiCall('getUser');
+  if (r.ok) {
+    setUser(r.user);
+    // Re-sync progress
+    const prog = await apiCall('getProgress');
+    if (prog.ok) localStorage.setItem('qq_progress', JSON.stringify(prog.progress));
+    return r.user;
+  } else {
+    // Token invalid — clear everything
+    localStorage.removeItem('qq_token');
+    localStorage.removeItem('qq_user');
+    localStorage.removeItem('qq_progress');
+    return null;
+  }
+}
+
+// ============================================================
+//  PROGRESS — always sync with server + local cache
+// ============================================================
 function getProgress() {
   try { return JSON.parse(localStorage.getItem('qq_progress')) || {}; }
   catch { return {}; }
 }
-function saveProgress(id, data) {
+
+async function saveProgress(id) {
+  // 1. Update local cache immediately (fast UI)
   const p = getProgress();
-  p[id] = { ...p[id], ...data, solvedAt: Date.now() };
-  localStorage.setItem('qq_progress', JSON.stringify(p));
+  if (!p[id]) {
+    p[id] = { solved: true, solvedAt: Date.now() };
+    localStorage.setItem('qq_progress', JSON.stringify(p));
+  }
+  // 2. Sync to server
+  const r = await apiCall('saveProgress', { challengeId: id });
+  return r;
 }
+
 function isSolved(id) { return getProgress()[id]?.solved === true; }
 
-// ===== XP =====
+// ============================================================
+//  XP — sync with server
+// ============================================================
 function getXP() { const u = getUser(); return u ? (u.xp || 0) : 0; }
-function addXP(amount) {
+
+async function addXP(amount) {
   const user = getUser();
   if (!user) return;
+
+  // 1. Update local immediately
   user.xp = (user.xp || 0) + amount;
   user.level = calcLevel(user.xp);
   setUser(user);
-  updateLeaderboard(user);
+  updateLocalLeaderboard(user);
+
+  // 2. Sync to server
+  const r = await apiCall('addXP', { amount });
+  if (r.ok) {
+    // Use server's authoritative values
+    user.xp    = r.xp;
+    user.level = r.level;
+    setUser(user);
+    updateLocalLeaderboard(user);
+  }
 }
+
 function calcLevel(xp) {
   if (xp >= 900) return 'Legendary';
   if (xp >= 500) return 'Expert';
@@ -53,7 +158,11 @@ function calcLevel(xp) {
   if (xp >= 40)  return 'Amateur';
   return 'Rookie';
 }
-function updateLeaderboard(user) {
+
+// ============================================================
+//  LEADERBOARD
+// ============================================================
+function updateLocalLeaderboard(user) {
   const board = JSON.parse(localStorage.getItem('qq_leaderboard') || '[]');
   const idx = board.findIndex(e => e.username === user.username);
   const entry = { username: user.username, xp: user.xp, level: user.level };
@@ -62,7 +171,25 @@ function updateLeaderboard(user) {
   localStorage.setItem('qq_leaderboard', JSON.stringify(board));
 }
 
-// ===== COUNTER ANIMATION (home page) =====
+async function fetchLeaderboard() {
+  const r = await apiCall('getLeaderboard');
+  if (r.ok) {
+    localStorage.setItem('qq_leaderboard', JSON.stringify(r.leaderboard));
+    return r.leaderboard;
+  }
+  return JSON.parse(localStorage.getItem('qq_leaderboard') || '[]');
+}
+
+// Rank from local cache (fast, used in dashboard)
+function getLocalRank(username) {
+  const board = JSON.parse(localStorage.getItem('qq_leaderboard') || '[]');
+  const idx = board.findIndex(e => e.username === username);
+  return idx >= 0 ? idx + 1 : null;
+}
+
+// ============================================================
+//  COUNTER ANIMATION (home page)
+// ============================================================
 function animateCounters() {
   document.querySelectorAll('.stat-num[data-target]').forEach(el => {
     const target = parseInt(el.dataset.target || 0);
@@ -76,9 +203,10 @@ function animateCounters() {
   });
 }
 
-// ===== HOME PAGE INIT =====
+// ============================================================
+//  HOME PAGE INIT
+// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Stats counter observer (home page only)
   const statsBar = document.querySelector('.stats-bar');
   if (statsBar) {
     const obs = new IntersectionObserver(entries => {
@@ -86,8 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.3 });
     obs.observe(statsBar);
   }
-
-  // Level card clicks (home page)
   document.querySelectorAll('.level-card:not(.locked)').forEach(card => {
     card.addEventListener('click', () => {
       const inPages = window.location.pathname.includes('/pages/');
@@ -96,10 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ===== EXPOSE API =====
+// ============================================================
+//  EXPOSE
+// ============================================================
 window.QQ = {
-  getUser, setUser, logout,
+  getUser, setUser, logout, register, login, restoreSession,
   getProgress, saveProgress, isSolved,
-  getXP, addXP, calcLevel, updateLeaderboard,
-  getTheme, setTheme
+  getXP, addXP, calcLevel,
+  fetchLeaderboard, updateLocalLeaderboard, getLocalRank,
+  getTheme, setTheme, apiCall
 };
