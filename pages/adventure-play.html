@@ -224,7 +224,19 @@ SELECT </textarea>
     // Nav buttons
     const idx = allEpisodes.indexOf(ep);
     document.getElementById('prevBtn').disabled = idx === 0;
-    document.getElementById('nextBtn').disabled = idx === allEpisodes.length - 1;
+    // FIX 1: Next locked unless current episode is solved
+    const nextEpBtn = document.getElementById('nextBtn');
+    nextEpBtn.disabled = idx === allEpisodes.length - 1;
+    if (!QQ.isSolved(ep.id) && idx < allEpisodes.length - 1) {
+      nextEpBtn.disabled = true;
+      nextEpBtn.title = 'Complete this episode first';
+      nextEpBtn.style.opacity = '0.4';
+      nextEpBtn.style.cursor = 'not-allowed';
+    } else {
+      nextEpBtn.title = '';
+      nextEpBtn.style.opacity = '';
+      nextEpBtn.style.cursor = '';
+    }
 
     // Reset output
     document.getElementById('resultsBody').innerHTML = '<div class="results-placeholder">Run your query to see results here.</div>';
@@ -313,9 +325,27 @@ SELECT </textarea>
   function closeSuccess() { document.getElementById('successOverlay').classList.remove('show'); }
   function goNext() { closeSuccess(); navEpisode(1); }
   function navEpisode(dir) {
-    const idx = allEpisodes.indexOf(currentEp);
+    const idx  = allEpisodes.indexOf(currentEp);
     const next = allEpisodes[idx + dir];
-    if (next) window.location.href = 'adventure-play.html?id=' + next.id;
+    if (!next) return;
+    // FIX 1: going forward requires current episode solved
+    if (dir > 0 && !QQ.isSolved(currentEp.id)) {
+      alert('Complete this episode first before moving to the next one.');
+      return;
+    }
+    // FIX 1: within same mode, ensure sequential order
+    if (dir > 0 && next.mode === currentEp.mode) {
+      const modeEps = ADVENTURE_DATA[currentEp.mode];
+      const curModeIdx = modeEps.findIndex(e => e.id === currentEp.id);
+      if (curModeIdx >= 0 && curModeIdx < modeEps.length - 1) {
+        const nextInMode = modeEps[curModeIdx + 1];
+        if (next.id !== nextInMode.id) {
+          alert('Please complete episodes in order within this adventure.');
+          return;
+        }
+      }
+    }
+    window.location.href = 'adventure-play.html?id=' + next.id;
   }
   function toggleHint() {
     const b = document.getElementById('hintBody');
