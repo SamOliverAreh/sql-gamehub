@@ -59,13 +59,58 @@ async function apiCall(action, params = {}) {
 }
 
 // ============================================================
+//  ANONYMOUS MODE
+//  All game logic works identically — XP, locks, tiers.
+//  Nothing is written to Google Sheets.
+//  Session lives only in localStorage and clears on tab close
+//  (we use sessionStorage so it auto-clears when browser closes).
+// ============================================================
+function isAnonymous() {
+  return sessionStorage.getItem('qq_anon') === 'true';
+}
+
+function startAnonymous() {
+  sessionStorage.setItem('qq_anon', 'true');
+  // Create a local-only user object
+  const anonUser = {
+    id:       'anon_' + Date.now(),
+    username: 'Guest_' + Math.random().toString(36).substring(2, 7).toUpperCase(),
+    email:    '',
+    xp:       0,
+    level:    'Rookie',
+    joinedAt: new Date().toISOString(),
+    isAnon:   true
+  };
+  sessionStorage.setItem('qq_anon_user', JSON.stringify(anonUser));
+  sessionStorage.setItem('qq_anon_progress', JSON.stringify({}));
+  return anonUser;
+}
+
+function clearAnonymous() {
+  sessionStorage.removeItem('qq_anon');
+  sessionStorage.removeItem('qq_anon_user');
+  sessionStorage.removeItem('qq_anon_progress');
+}
+
+// ============================================================
 //  AUTH
 // ============================================================
 function getUser() {
+  // Anonymous user stored in sessionStorage
+  if (isAnonymous()) {
+    try { return JSON.parse(sessionStorage.getItem('qq_anon_user')) || null; }
+    catch { return null; }
+  }
   try { return JSON.parse(localStorage.getItem('qq_user')) || null; }
   catch { return null; }
 }
-function setUser(u) { localStorage.setItem('qq_user', JSON.stringify(u)); }
+function setUser(u) {
+  if (isAnonymous() || (u && u.isAnon)) {
+    sessionStorage.setItem('qq_anon_user', JSON.stringify(u));
+    return;
+  }
+  localStorage.setItem('qq_user', JSON.stringify(u));
+}
 
 async function register(username, email, password) {
   const r = await apiCall('register', { username, email, password });
@@ -91,6 +136,12 @@ async function login(username, password) {
 }
 
 async function logout() {
+  if (isAnonymous()) {
+    clearAnonymous();
+    const inPages = window.location.pathname.includes('/pages/');
+    window.location.href = inPages ? '../index.html' : 'index.html';
+    return;
+  }
   const token = localStorage.getItem('qq_token');
   if (token) await apiCall('logout', { token });
   localStorage.removeItem('qq_token');
@@ -102,17 +153,19 @@ async function logout() {
 
 // Restore session on page load (refresh user data from server)
 async function restoreSession() {
+  // Anonymous session — already in sessionStorage, no server call needed
+  if (isAnonymous()) {
+    return getUser();
+  }
   const token = localStorage.getItem('qq_token');
   if (!token) return null;
   const r = await apiCall('getUser');
   if (r.ok) {
     setUser(r.user);
-    // Re-sync progress
     const prog = await apiCall('getProgress');
     if (prog.ok) localStorage.setItem('qq_progress', JSON.stringify(prog.progress));
     return r.user;
   } else {
-    // Token invalid — clear everything
     localStorage.removeItem('qq_token');
     localStorage.removeItem('qq_user');
     localStorage.removeItem('qq_progress');
@@ -124,20 +177,33 @@ async function restoreSession() {
 //  PROGRESS — always sync with server + local cache
 // ============================================================
 function getProgress() {
+  if (isAnonymous()) {
+    try { return JSON.parse(sessionStorage.getItem('qq_anon_progress')) || {}; }
+    catch { return {}; }
+  }
   try { return JSON.parse(localStorage.getItem('qq_progress')) || {}; }
   catch { return {}; }
 }
 
 async function saveProgress(id) {
-  // 1. Ask server first — server is the source of truth
+  if (isAnonymous()) {
+    // Anonymous: save to sessionStorage only, no server call
+    const p = getProgress();
+    const alreadySolved = !!p[id]?.solved;
+    if (!alreadySolved) {
+      p[id] = { solved: true, solvedAt: Date.now() };
+      sessionStorage.setItem('qq_anon_progress', JSON.stringify(p));
+    }
+    return { ok: true, alreadySolved };
+  }
+  // Registered: ask server first — server is source of truth
   const r = await apiCall('saveProgress', { challengeId: id });
-  // 2. Update local cache to match
+  // Update local cache to match
   const p = getProgress();
   if (!p[id]) {
     p[id] = { solved: true, solvedAt: Date.now() };
     localStorage.setItem('qq_progress', JSON.stringify(p));
   }
-  // r.alreadySolved = true means server already had this record
   return r;
 }
 
@@ -152,16 +218,22 @@ async function addXP(amount) {
   const user = getUser();
   if (!user) return;
 
-  // 1. Update local immediately
-  user.xp = (user.xp || 0) + amount;
+  user.xp    = (user.xp || 0) + amount;
   user.level = calcLevel(user.xp);
+
+  if (isAnonymous()) {
+    // Save to sessionStorage only — no server call
+    sessionStorage.setItem('qq_anon_user', JSON.stringify(user));
+    // Add to local leaderboard so rank shows correctly
+    updateLocalLeaderboard(user);
+    return;
+  }
+
+  // Registered: update local then sync to server
   setUser(user);
   updateLocalLeaderboard(user);
-
-  // 2. Sync to server
   const r = await apiCall('addXP', { amount });
   if (r.ok) {
-    // Use server's authoritative values
     user.xp    = r.xp;
     user.level = r.level;
     setUser(user);
@@ -249,5 +321,6 @@ window.QQ = {
   getProgress, saveProgress, isSolved,
   getXP, addXP, calcLevel,
   fetchLeaderboard, updateLocalLeaderboard, getLocalRank,
-  getTheme, setTheme, apiCall
+  getTheme, setTheme, apiCall,
+  isAnonymous, startAnonymous, clearAnonymous
 };
