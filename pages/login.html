@@ -66,12 +66,18 @@ async function handleLogin() {
   const password = document.getElementById('password').value;
   if (!username || !password) return showAlert('Please fill in all fields.');
   const btn = document.getElementById('loginBtn');
-  btn.textContent = 'Logging in...'; btn.classList.add('btn-loading');
+  const wasGuest = QQ.isAnonymous();
+  btn.textContent = wasGuest ? 'Logging in & saving progress...' : 'Logging in...';
+  btn.classList.add('btn-loading');
   const r = await QQ.login(username, password);
   btn.textContent = 'Login →'; btn.classList.remove('btn-loading');
   if (!r.ok) return showAlert(r.error || 'Login failed.');
-  showAlert('Login successful! Redirecting...', 'success');
-  setTimeout(() => window.location.href = 'dashboard.html', 800);
+  if (wasGuest) {
+    showAlert('Logged in! Your guest progress has been saved to your account.', 'success');
+  } else {
+    showAlert('Login successful! Redirecting...', 'success');
+  }
+  setTimeout(() => window.location.href = 'dashboard.html', 1000);
 }
 document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
 
