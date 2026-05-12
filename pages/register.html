@@ -44,6 +44,16 @@
   <div class="form-group"><label>Confirm Password</label><input type="password" id="confirm" placeholder="repeat password"/></div>
   <button class="btn-primary" id="regBtn" style="width:100%;justify-content:center;padding:13px;" onclick="handleRegister()">Create Account →</button>
   <div class="auth-switch">Already have an account? <a href="login.html">Login here</a></div>
+
+  <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);text-align:center;">
+    <p style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-dim);margin-bottom:12px;">NOT READY TO REGISTER?</p>
+    <button onclick="playAsGuest()" class="btn-ghost" style="width:100%;justify-content:center;gap:8px;">
+      👤 Play as Guest
+    </button>
+    <p style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-dim);margin-top:8px;line-height:1.6;">
+      Full access to all challenges &amp; adventures. Progress not saved when you close the tab.
+    </p>
+  </div>
 </div>
 
 <script src="../js/main.js"></script>
@@ -79,6 +89,21 @@ async function handleRegister() {
   setTimeout(() => window.location.href = 'dashboard.html', 800);
 }
 document.addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
+
+function playAsGuest() {
+  if (!confirm(
+    '⚠️ Guest Mode Notice\n\n' +
+    '• Full access to all challenges and adventures\n' +
+    '• XP, tier unlocks and progress work normally\n' +
+    '• Your progress is NOT saved to any database\n' +
+    '• Progress will be lost when you close this tab\n\n' +
+    'No personal data is collected in guest mode.\n\n' +
+    'Continue as guest?'
+  )) return;
+  const user = QQ.startAnonymous();
+  showAlert('Welcome, ' + user.username + '! Playing as guest.', 'success');
+  setTimeout(() => window.location.href = 'challenges.html', 1000);
+}
 </script>
 </body>
 </html>
