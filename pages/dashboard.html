@@ -12,8 +12,7 @@
     .dash-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:32px; flex-wrap:wrap; }
     .dash-welcome h1 { font-size:clamp(1.3rem,4vw,1.8rem); }
     .dash-welcome p { color:var(--text-muted); margin-top:4px; font-size:0.86rem; }
-    /* FIX 3: tier text badge — no emoji, just text label */
-    .stat-card-tier { font-family:var(--font-display); font-size:1.1rem; color:var(--accent); letter-spacing:0.05em; }
+    /* FIX 1: tier card uses same size as other stat cards via .stat-card-num */
     /* Tier rows */
     .tier-row { display:flex; align-items:center; gap:14px; padding:13px 16px; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; flex-wrap:wrap; }
     .tier-row.active { border-color:var(--accent); background:rgba(0,212,255,0.04); }
@@ -72,6 +71,15 @@
     <a href="challenges.html" class="btn-primary">Continue →</a>
   </div>
 
+  <!-- Guest banner -->
+  <div id="guestBanner" style="display:none;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.35);border-radius:10px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div>
+      <div style="font-family:var(--font-display);font-size:0.82rem;color:var(--warning);">👤 Playing as Guest</div>
+      <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:3px;">Your progress is stored in this tab only and will be lost when you close it.</div>
+    </div>
+    <a href="register.html" class="btn-primary btn-sm">💾 Save Progress — Register Free</a>
+  </div>
+
   <!-- XP Bar -->
   <div class="xp-bar-wrap" style="margin-bottom:32px;">
     <div class="xp-bar-label"><span id="xpLabel">0 XP</span><span id="xpNextLabel"></span></div>
@@ -84,7 +92,7 @@
     <div class="stat-card"><div class="stat-card-num" id="sSolved">0</div><div class="stat-card-label">Challenges Solved</div></div>
     <div class="stat-card"><div class="stat-card-num" id="sRank">#—</div><div class="stat-card-label">Leaderboard Rank</div></div>
     <!-- FIX 3: show tier NAME not emoji -->
-    <div class="stat-card"><div class="stat-card-num stat-card-tier" id="sTier">Rookie</div><div class="stat-card-label">Current Tier</div></div>
+    <div class="stat-card"><div class="stat-card-num" id="sTier">Rookie</div><div class="stat-card-label">Current Tier</div></div>
   </div>
 
   <!-- Tier Progress -->
@@ -113,17 +121,22 @@
 document.addEventListener('DOMContentLoaded', async () => {
   buildNav('dashboard');
 
-  // FIX: always restore from server first so XP/rank are accurate
-  const user = await QQ.restoreSession();
-  if (!user) { window.location.href = 'login.html'; return; }
-
-  // FIX 1: fetch live leaderboard so rank matches leaderboard page
-  await QQ.fetchLeaderboard();
+  let user;
+  if (QQ.isAnonymous()) {
+    user = QQ.getUser();
+  } else {
+    user = await QQ.restoreSession();
+    if (!user) { window.location.href = 'login.html'; return; }
+    await QQ.fetchLeaderboard();
+  }
 
   render(user);
 });
 
 function render(user) {
+  // Show guest warning banner for anonymous users
+  const banner = document.getElementById('guestBanner');
+  if (banner) banner.style.display = user.isAnon ? 'flex' : 'none';
   const xp       = user.xp || 0;
   const level    = user.level || 'Rookie';
   const progress = QQ.getProgress();
