@@ -51,7 +51,19 @@ function buildNav(activePage) {
   const navAuth = document.getElementById('navAuth');
   const mobileAuth = document.getElementById('mobileAuthLinks');
 
-  if (user) {
+  if (user && user.isAnon) {
+    // Anonymous / guest user
+    if (navAuth) navAuth.innerHTML = `
+      <span class="nav-user" style="color:var(--warning);">👤 Guest</span>
+      <a href="${loginURL}" class="btn-ghost btn-sm">Save Progress</a>
+      <button class="btn-ghost btn-sm" onclick="QQ.logout()">Exit Guest</button>
+    `;
+    if (mobileAuth) mobileAuth.innerHTML = `
+      <a href="${loginURL}" style="color:var(--warning);">👤 Playing as Guest</a>
+      <a href="${loginURL}" style="color:var(--accent);">💾 Save Progress — Register</a>
+      <button onclick="QQ.logout()" style="color:var(--danger);background:none;border:none;cursor:pointer;font-family:var(--font-display);font-size:0.82rem;text-align:left;padding:12px 8px;width:100%;text-transform:uppercase;letter-spacing:0.08em;">Exit Guest</button>
+    `;
+  } else if (user) {
     if (navAuth) navAuth.innerHTML = `
       <span class="nav-user">⬡ ${user.username}</span>
       <a href="${dashURL}" class="btn-ghost btn-sm">Dashboard</a>
