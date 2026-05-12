@@ -304,9 +304,9 @@ SELECT </textarea>
     document.getElementById('successXP').textContent    = firstTime
       ? `+${currentEp.xp} XP earned! 🎉`
       : 'Already completed ✓';
-    document.getElementById('successMsg').textContent   = firstTime
-      ? `Excellent SQL! ${currentEp.expectedNote}`
-      : 'You already completed this episode. No extra XP!';
+    const baseMsg2 = firstTime ? `Excellent SQL! ${currentEp.expectedNote}` : 'You already completed this episode. No extra XP!';
+    const anonMsg2 = QQ.isAnonymous() ? '<br><br>👤 <strong>Guest mode:</strong> <a href="register.html" style="color:var(--accent);">Register free</a> to save your progress!' : '';
+    document.getElementById('successMsg').innerHTML = baseMsg2 + anonMsg2;
     document.getElementById('successOverlay').classList.add('show');
   }
 
