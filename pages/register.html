@@ -81,12 +81,18 @@ async function handleRegister() {
   if (password !== confirm) return showAlert('Passwords do not match.');
   if (!/\S+@\S+\.\S+/.test(email)) return showAlert('Please enter a valid email.');
   const btn = document.getElementById('regBtn');
-  btn.textContent = 'Creating account...'; btn.classList.add('btn-loading');
+  const wasGuest = QQ.isAnonymous();
+  btn.textContent = wasGuest ? 'Creating account & saving progress...' : 'Creating account...';
+  btn.classList.add('btn-loading');
   const r = await QQ.register(username, email, password);
   btn.textContent = 'Create Account →'; btn.classList.remove('btn-loading');
   if (!r.ok) return showAlert(r.error || 'Registration failed.');
-  showAlert('Account created! Redirecting...', 'success');
-  setTimeout(() => window.location.href = 'dashboard.html', 800);
+  if (wasGuest) {
+    showAlert('Account created! Your guest progress has been saved. Redirecting...', 'success');
+  } else {
+    showAlert('Account created! Redirecting...', 'success');
+  }
+  setTimeout(() => window.location.href = 'dashboard.html', 1000);
 }
 document.addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
 
