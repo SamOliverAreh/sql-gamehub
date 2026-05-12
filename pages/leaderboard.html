@@ -72,17 +72,56 @@ function render() {
     if (myRank>0) document.getElementById('yourBanner').innerHTML=`<div class="your-banner"><span>Your rank: <span>#${myRank}</span></span><span>XP: <span>${user.xp||0}</span></span><span>Tier: <span>${user.level||'Rookie'}</span></span></div>`;
   }
 
-  // Podium (reorder: 2nd, 1st, 3rd)
-  const top3=board.slice(0,3);
-  const order=top3.length>=3?[top3[1],top3[0],top3[2]]:top3;
-  const cls=['','rank1',''];const medals=['🥈','🥇','🥉'];
-  let p3='';
-  order.forEach((pl,i)=>{
-    if(!pl)return;
-    const isMe=user&&pl.username===user.username;
-    p3+=`<div class="podium-card ${cls[i]}"><div class="podium-rank">${medals[i]}</div><div class="podium-avatar">${pl.username[0].toUpperCase()}</div><div class="podium-name">${pl.username}${isMe?' (you)':''}</div><div class="podium-xp">${pl.xp} XP</div><div class="podium-level"><span class="badge badge-${(pl.level||'rookie').toLowerCase()}">${pl.level||'Rookie'}</span></div></div>`;
-  });
-  document.getElementById('top3').innerHTML=p3;
+  // Podium: always show in correct visual order
+  // 3+ players: [2nd, 1st, 3rd] (classic podium shape)
+  // 2 players:  [1st, 2nd] side by side (no empty 3rd slot)
+  // 1 player:   [1st] centred
+  // 0 players:  hide podium
+  const top3 = board.slice(0, 3);
+  const podiumEl = document.getElementById('top3');
+
+  if (top3.length === 0) {
+    podiumEl.style.display = 'none';
+  } else {
+    // Build display order and correct medal/class assignments
+    let displaySlots; // each slot: { player, medal, cls }
+    if (top3.length >= 3) {
+      displaySlots = [
+        { player: top3[1], medal: '🥈', cls: '' },
+        { player: top3[0], medal: '🥇', cls: 'rank1' },
+        { player: top3[2], medal: '🥉', cls: '' }
+      ];
+      podiumEl.style.gridTemplateColumns = '1fr 1.1fr 1fr';
+    } else if (top3.length === 2) {
+      // Just show rank1 and rank2 side by side, rank1 in left slot correctly
+      displaySlots = [
+        { player: top3[0], medal: '🥇', cls: 'rank1' },
+        { player: top3[1], medal: '🥈', cls: '' }
+      ];
+      podiumEl.style.gridTemplateColumns = '1.1fr 1fr';
+    } else {
+      displaySlots = [
+        { player: top3[0], medal: '🥇', cls: 'rank1' }
+      ];
+      podiumEl.style.gridTemplateColumns = '1fr';
+      podiumEl.style.maxWidth = '220px';
+      podiumEl.style.margin = '0 auto 36px';
+    }
+
+    let p3 = '';
+    displaySlots.forEach(slot => {
+      const pl   = slot.player;
+      const isMe = user && pl.username === user.username;
+      p3 += `<div class="podium-card ${slot.cls}">
+        <div class="podium-rank">${slot.medal}</div>
+        <div class="podium-avatar">${pl.username[0].toUpperCase()}</div>
+        <div class="podium-name">${pl.username}${isMe ? ' (you)' : ''}</div>
+        <div class="podium-xp">${pl.xp} XP</div>
+        <div class="podium-level"><span class="badge badge-${(pl.level||'rookie').toLowerCase()}">${pl.level||'Rookie'}</span></div>
+      </div>`;
+    });
+    podiumEl.innerHTML = p3;
+  }
 
   const list=document.getElementById('lbList');
   if(!board.length){list.innerHTML='<div style="padding:40px;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:0.8rem;">No players yet. Be the first!</div>';return;}
