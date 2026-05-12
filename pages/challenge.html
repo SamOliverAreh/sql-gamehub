@@ -249,9 +249,9 @@ async function handleSuccess(){
   // Hide validating, show success
   valOverlay.classList.remove('show');
   document.getElementById('successXP').textContent  = firstTime ? '+' + currentChallenge.xp + ' XP earned! 🎉' : 'Already completed ✓';
-  document.getElementById('successMsg').textContent = firstTime
-    ? 'Correct! ' + currentChallenge.expectedNote
-    : 'You already solved this one. No extra XP, but great practice!';
+  const baseMsg = firstTime ? 'Correct! ' + currentChallenge.expectedNote : 'You already solved this one. No extra XP, but great practice!';
+  const anonMsg = QQ.isAnonymous() ? '<br><br>👤 <strong>Guest mode:</strong> <a href="register.html" style="color:var(--accent);">Register free</a> to save your progress!' : '';
+  document.getElementById('successMsg').innerHTML = baseMsg + anonMsg;
   document.getElementById('successOverlay').classList.add('show');
 }
 function closeSuccess(){document.getElementById('successOverlay').classList.remove('show');}
