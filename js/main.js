@@ -92,6 +92,30 @@ function clearAnonymous() {
   sessionStorage.removeItem('qq_anon_progress');
 }
 
+// Transfer anonymous session progress to a newly registered/logged-in account
+// Called right after register() or login() when coming from a guest session
+async function transferAnonProgress(anonProgress, anonUser) {
+  if (!anonProgress || Object.keys(anonProgress).length === 0) return;
+
+  // 1. Write progress records to server for each solved challenge
+  const solvedIds = Object.keys(anonProgress).filter(id => anonProgress[id]?.solved);
+  for (const id of solvedIds) {
+    await apiCall('saveProgress', { challengeId: id });
+  }
+
+  // 2. Calculate total XP from anon user and sync to server
+  const anonXP = anonUser ? (anonUser.xp || 0) : 0;
+  if (anonXP > 0) {
+    // Set XP directly on server rather than adding (avoids double-count)
+    await apiCall('setXP', { xp: anonXP });
+  }
+
+  // 3. Merge into localStorage progress cache
+  const existingProgress = JSON.parse(localStorage.getItem('qq_progress') || '{}');
+  const merged = Object.assign({}, anonProgress, existingProgress);
+  localStorage.setItem('qq_progress', JSON.stringify(merged));
+}
+
 // ============================================================
 //  AUTH
 // ============================================================
@@ -113,24 +137,49 @@ function setUser(u) {
 }
 
 async function register(username, email, password) {
+  // Capture anon progress BEFORE clearing the anon session
+  const wasAnon      = isAnonymous();
+  const anonProgress = wasAnon ? getProgress() : null;
+  const anonUser     = wasAnon ? getUser()     : null;
+
   const r = await apiCall('register', { username, email, password });
   if (r.ok) {
+    // Clear anon session first
+    if (wasAnon) clearAnonymous();
     localStorage.setItem('qq_token', r.token);
     setUser(r.user);
     updateLocalLeaderboard(r.user);
+    // Transfer anon progress to new account
+    if (wasAnon && anonProgress) {
+      await transferAnonProgress(anonProgress, anonUser);
+      // Re-fetch user to get updated XP from server
+      const updated = await apiCall('getUser');
+      if (updated.ok) { setUser(updated.user); updateLocalLeaderboard(updated.user); }
+    }
   }
   return r;
 }
 
 async function login(username, password) {
+  // Capture anon progress BEFORE clearing session
+  const wasAnon      = isAnonymous();
+  const anonProgress = wasAnon ? getProgress() : null;
+  const anonUser     = wasAnon ? getUser()     : null;
+
   const r = await apiCall('login', { username, password });
   if (r.ok) {
+    if (wasAnon) clearAnonymous();
     localStorage.setItem('qq_token', r.token);
     setUser(r.user);
-    // Also restore progress from server
+    // Transfer anon progress first, then re-sync from server
+    if (wasAnon && anonProgress) {
+      await transferAnonProgress(anonProgress, anonUser);
+    }
     const prog = await apiCall('getProgress');
     if (prog.ok) localStorage.setItem('qq_progress', JSON.stringify(prog.progress));
-    updateLocalLeaderboard(r.user);
+    const updated = await apiCall('getUser');
+    if (updated.ok) { setUser(updated.user); updateLocalLeaderboard(updated.user); }
+    else updateLocalLeaderboard(r.user);
   }
   return r;
 }
@@ -322,5 +371,5 @@ window.QQ = {
   getXP, addXP, calcLevel,
   fetchLeaderboard, updateLocalLeaderboard, getLocalRank,
   getTheme, setTheme, apiCall,
-  isAnonymous, startAnonymous, clearAnonymous
+  isAnonymous, startAnonymous, clearAnonymous, transferAnonProgress
 };
