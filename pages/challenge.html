@@ -185,8 +185,21 @@ function loadChallenge(ch) {
   document.getElementById('chConcepts').innerHTML = ch.concepts.map(c=>`<span>${c}</span>`).join('');
   document.getElementById('solvedBadge').innerHTML = QQ.isSolved(ch.id) ? '<span class="badge badge-rookie">✓ Solved</span>' : '';
   const idx = CHALLENGES_DATA.indexOf(ch);
-  document.getElementById('prevBtn').disabled = idx===0;
-  document.getElementById('nextBtn').disabled = idx===CHALLENGES_DATA.length-1;
+  document.getElementById('prevBtn').disabled = idx === 0;
+  // FIX 1: Next locked unless current challenge is solved
+  const nextCh = CHALLENGES_DATA[idx + 1];
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.disabled = idx === CHALLENGES_DATA.length - 1;
+  if (nextCh && !QQ.isSolved(ch.id)) {
+    nextBtn.disabled = true;
+    nextBtn.title = 'Solve this challenge first to unlock the next one';
+    nextBtn.style.opacity = '0.4';
+    nextBtn.style.cursor = 'not-allowed';
+  } else {
+    nextBtn.title = '';
+    nextBtn.style.opacity = '';
+    nextBtn.style.cursor = '';
+  }
   document.getElementById('resultsBody').innerHTML = '<div class="results-placeholder">Run your query to see results here.</div>';
   document.getElementById('execTime').textContent = '';
   document.getElementById('resultsLabel').textContent = 'RESULTS';
@@ -256,7 +269,32 @@ async function handleSuccess(){
 }
 function closeSuccess(){document.getElementById('successOverlay').classList.remove('show');}
 function nextChallenge(){closeSuccess();navigate(1);}
-function navigate(dir){const idx=CHALLENGES_DATA.indexOf(currentChallenge);const n=CHALLENGES_DATA[idx+dir];if(n)window.location.href='challenge.html?id='+n.id;}
+function navigate(dir){
+  const idx = CHALLENGES_DATA.indexOf(currentChallenge);
+  const n   = CHALLENGES_DATA[idx + dir];
+  if (!n) return;
+  // FIX 1: going forward requires current to be solved
+  if (dir > 0 && !QQ.isSolved(currentChallenge.id)) {
+    alert('Complete this challenge first before moving to the next one.');
+    return;
+  }
+  // FIX 1: going forward also requires previous sequential lock satisfied
+  const nIdx = CHALLENGES_DATA.indexOf(n);
+  const sameTier = n.tier === currentChallenge.tier;
+  if (dir > 0 && sameTier) {
+    // Already checked above
+  } else if (dir > 0 && !sameTier) {
+    // Moving to next tier — check tier lock
+    const progress = QQ.getProgress();
+    const prevTierChs = CHALLENGES_DATA.filter(c => c.tier === currentChallenge.tier);
+    const allDone = prevTierChs.every(c => progress[c.id]?.solved);
+    if (!allDone) {
+      alert('Complete all challenges in the ' + currentChallenge.tierName + ' tier first.');
+      return;
+    }
+  }
+  window.location.href = 'challenge.html?id=' + n.id;
+}
 function toggleHint(){const b=document.getElementById('hintBody');b.classList.toggle('show');document.getElementById('hintArrow').textContent=b.classList.contains('show')?'▲':'▼';}
 function clearEditor(){editor.setValue('-- Write your SQL query here\nSELECT ');editor.focus();}
 function showSolution(){if(confirm('Show the solution? This will replace your current query.'))editor.setValue(currentChallenge.solutionQuery.trim());}
