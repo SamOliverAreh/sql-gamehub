@@ -113,24 +113,26 @@
   <div class="recent-list" id="recentList"></div>
 </div>
 
+<script src="../js/page-loader.js"></script>
 <script src="../js/main.js"></script>
 <script src="../js/nav-inject.js"></script>
 <script src="../data/challenges.js"></script>
 <script src="../data/adventure-data.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
+  // Block page immediately while loading
+  PageLoader.show('Loading Dashboard', 'Fetching your progress...');
   buildNav('dashboard');
-
   let user;
   if (QQ.isAnonymous()) {
     user = QQ.getUser();
   } else {
     user = await QQ.restoreSession();
-    if (!user) { window.location.href = 'login.html'; return; }
+    if (!user) { PageLoader.hide(); window.location.href = 'login.html'; return; }
     await QQ.fetchLeaderboard();
   }
-
   render(user);
+  PageLoader.hide();
 });
 
 function render(user) {
