@@ -76,17 +76,27 @@
   <div class="footer-links"><a href="adventures.html">Adventures</a><a href="leaderboard.html">Leaderboard</a></div>
 </footer>
 
+<script src="../js/page-loader.js"></script>
 <script src="../js/main.js"></script>
 <script src="../js/nav-inject.js"></script>
 <script src="../data/challenges.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
+  // FIX 4: block page and require auth or guest session to play
+  const token  = localStorage.getItem('qq_token');
+  const isAnon = QQ.isAnonymous();
+  if (!token && !isAnon) {
+    // Not logged in and not a guest — redirect to register
+    window.location.href = 'register.html';
+    return;
+  }
+  PageLoader.show('Loading Challenges', 'Fetching your progress...');
   buildNav('challenges');
-  // Always restore fresh XP + progress from server before rendering tier locks
   await QQ.restoreSession();
   document.getElementById('loadingScreen').style.display = 'none';
   document.getElementById('challengesContainer').style.display = 'block';
   renderChallenges();
+  PageLoader.hide();
   const params = new URLSearchParams(window.location.search);
   const lvl = params.get('level');
   if (lvl) setTimeout(() => document.getElementById('tier-'+lvl)?.scrollIntoView({behavior:'smooth',block:'start'}), 300);
