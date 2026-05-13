@@ -315,16 +315,53 @@ SELECT </textarea>
     await new Promise(r => setTimeout(r, 400));
     valOverlay.classList.remove('show');
 
+    // FIX 3: unlock Next button immediately after solve
+    if (firstTime) {
+      const epIdx2    = allEpisodes.indexOf(currentEp);
+      const nextEpBtn2 = document.getElementById('nextBtn');
+      if (nextEpBtn2 && epIdx2 < allEpisodes.length - 1) {
+        nextEpBtn2.disabled      = false;
+        nextEpBtn2.style.opacity = '';
+        nextEpBtn2.style.cursor  = '';
+        nextEpBtn2.title         = '';
+      }
+    }
+
+    // FIX 4: check if entire adventure mode is complete
+    const modeEps   = ADVENTURE_DATA[currentEp.mode] || [];
+    const prog3     = QQ.getProgress();
+    const modeDone  = firstTime && modeEps.every(e => e.id === currentEp.id || prog3[e.id]?.solved);
+    const isLastEp  = modeEps[modeEps.length - 1]?.id === currentEp.id;
+
     const icons  = { detective:'🔍', space:'🚀', dungeon:'⚔️' };
     const titles = { detective:'Case Solved!', space:'Mission Complete!', dungeon:'Monster Defeated!' };
     document.getElementById('successIcon').textContent  = icons[currentEp.mode]  || '🎉';
-    document.getElementById('successTitle').textContent = titles[currentEp.mode] || 'Complete!';
-    document.getElementById('successXP').textContent    = firstTime
-      ? `+${currentEp.xp} XP earned! 🎉`
-      : 'Already completed ✓';
+
+    // Override title for adventure completion
+    if (modeDone && isLastEp) {
+      const completionTitles = { detective:'Case Closed! 🕵️', space:'Mission Accomplished! 🚀', dungeon:'Dungeon Cleared! ⚔️' };
+      document.getElementById('successTitle').textContent = completionTitles[currentEp.mode] || 'Adventure Complete!';
+    } else {
+      document.getElementById('successTitle').textContent = titles[currentEp.mode] || 'Complete!';
+    }
+
+    document.getElementById('successXP').textContent = firstTime ? `+${currentEp.xp} XP earned! 🎉` : 'Already completed ✓';
+
     const baseMsg2 = firstTime ? `Excellent SQL! ${currentEp.expectedNote}` : 'You already completed this episode. No extra XP!';
     const anonMsg2 = QQ.isAnonymous() ? '<br><br>👤 <strong>Guest mode:</strong> <a href="register.html" style="color:var(--accent);">Register free</a> to save your progress!' : '';
-    document.getElementById('successMsg').innerHTML = baseMsg2 + anonMsg2;
+
+    // FIX 4: adventure completion message
+    let advMsg = '';
+    if (modeDone && isLastEp && firstTime) {
+      const endings = {
+        detective: '<br><br>🎊 <strong>THE DATACORP SCANDAL IS SOLVED!</strong> Your SQL skills cracked the case. All 6 cases cleared. Try Space Explorer or SQL Dungeon next!',
+        space:     '<br><br>🎊 <strong>THE ISS QUERYON IS SAFE!</strong> Lieutenant Vega makes it home. All 5 missions complete. Try Detective Agency or SQL Dungeon next!',
+        dungeon:   '<br><br>🎊 <strong>THE LEGENDARY KEY IS YOURS!</strong> The Shadow Wyrm is defeated. All 7 floors cleared. You have mastered the Cursed Archive!'
+      };
+      advMsg = endings[currentEp.mode] || '<br><br>🎊 <strong>ADVENTURE COMPLETE!</strong>';
+    }
+
+    document.getElementById('successMsg').innerHTML = baseMsg2 + advMsg + anonMsg2;
     document.getElementById('successOverlay').classList.add('show');
   }
 
