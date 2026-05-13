@@ -156,6 +156,7 @@ SELECT </textarea>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script src="../js/page-loader.js"></script>
 <script src="../js/main.js"></script>
 <script src="../js/nav-inject.js"></script>
 <script src="../data/challenges.js"></script>
@@ -165,9 +166,16 @@ const editor = CodeMirror.fromTextArea(document.getElementById('sqlEditor'),{mod
 const params = new URLSearchParams(window.location.search);
 currentChallenge = CHALLENGES_DATA.find(c=>c.id===params.get('id')) || CHALLENGES_DATA[0];
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // FIX 4: require auth or guest session
+  const token  = localStorage.getItem('qq_token');
+  const isAnon = QQ.isAnonymous();
+  if (!token && !isAnon) { window.location.href = 'register.html'; return; }
+  PageLoader.show('Loading Challenge', 'Preparing the database...');
   buildNav('challenges');
+  await QQ.restoreSession();
   loadChallenge(currentChallenge);
+  PageLoader.hide();
 });
 
 function loadChallenge(ch) {
