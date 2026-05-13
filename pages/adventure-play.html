@@ -176,6 +176,7 @@ SELECT </textarea>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script src="../js/page-loader.js"></script>
 <script src="../js/main.js"></script>
 <script src="../js/nav-inject.js"></script>
 <script src="../data/adventure-data.js"></script>
@@ -198,10 +199,15 @@ SELECT </textarea>
   });
 
   document.addEventListener('DOMContentLoaded', async () => {
+    // FIX 4: require auth or guest session
+    const token  = localStorage.getItem('qq_token');
+    const isAnon = QQ.isAnonymous();
+    if (!token && !isAnon) { window.location.href = '../pages/register.html'; return; }
+    PageLoader.show('Loading Episode', 'Preparing your mission...');
     buildNav('adventures');
-    // Restore fresh session so isSolved reflects server state
     await QQ.restoreSession();
     loadEpisode(currentEp);
+    PageLoader.hide();
   });
 
   function loadEpisode(ep) {
