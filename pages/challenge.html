@@ -269,10 +269,42 @@ async function handleSuccess(){
 
   // Hide validating, show success
   valOverlay.classList.remove('show');
-  document.getElementById('successXP').textContent  = firstTime ? '+' + currentChallenge.xp + ' XP earned! 🎉' : 'Already completed ✓';
+
+  // FIX 3: unlock Next button immediately after solve — no refresh needed
+  if (firstTime) {
+    const idx2    = CHALLENGES_DATA.indexOf(currentChallenge);
+    const nextBtn2 = document.getElementById('nextBtn');
+    const nextCh2  = CHALLENGES_DATA[idx2 + 1];
+    if (nextCh2 && nextBtn2) {
+      nextBtn2.disabled = false;
+      nextBtn2.style.opacity = '';
+      nextBtn2.style.cursor  = '';
+      nextBtn2.title         = '';
+    }
+  }
+
+  // Check tier completion for popup message
+  const tierChs   = CHALLENGES_DATA.filter(c => c.tier === currentChallenge.tier);
+  const progress2 = QQ.getProgress();
+  const tierDone  = firstTime && tierChs.every(c => c.id === currentChallenge.id || progress2[c.id]?.solved);
+  const isLastTier = currentChallenge.tier === 6;
+
+  document.getElementById('successXP').textContent = firstTime ? '+' + currentChallenge.xp + ' XP earned! 🎉' : 'Already completed ✓';
   const baseMsg = firstTime ? 'Correct! ' + currentChallenge.expectedNote : 'You already solved this one. No extra XP, but great practice!';
   const anonMsg = QQ.isAnonymous() ? '<br><br>👤 <strong>Guest mode:</strong> <a href="register.html" style="color:var(--accent);">Register free</a> to save your progress!' : '';
-  document.getElementById('successMsg').innerHTML = baseMsg + anonMsg;
+
+  // FIX 4: tier completion message
+  let tierMsg = '';
+  if (tierDone && firstTime) {
+    if (isLastTier) {
+      tierMsg = '<br><br>🏆 <strong>LEGENDARY STATUS ACHIEVED!</strong> You have completed all challenge tiers. You are a true SQL master!';
+    } else {
+      const nextTierName = TIERS.find(t => t.id === currentChallenge.tier + 1)?.name || 'next';
+      tierMsg = '<br><br>🎊 <strong>TIER COMPLETE!</strong> You have cleared all ' + currentChallenge.tierName + ' challenges! The ' + nextTierName + ' tier is now unlocked.';
+    }
+  }
+
+  document.getElementById('successMsg').innerHTML = baseMsg + tierMsg + anonMsg;
   document.getElementById('successOverlay').classList.add('show');
 }
 function closeSuccess(){document.getElementById('successOverlay').classList.remove('show');}
