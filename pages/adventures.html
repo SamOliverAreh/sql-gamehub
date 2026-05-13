@@ -129,17 +129,21 @@
   <div class="footer-links"><a href="challenges.html">Standard Challenges</a><a href="leaderboard.html">Leaderboard</a></div>
 </footer>
 
+<script src="../js/page-loader.js"></script>
 <script src="../js/main.js"></script>
 <script src="../js/nav-inject.js"></script>
 <script src="../data/adventure-data.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
+  // FIX 4: require auth or guest session
+  const token  = localStorage.getItem('qq_token');
+  const isAnon = QQ.isAnonymous();
+  if (!token && !isAnon) { window.location.href = 'register.html'; return; }
+  PageLoader.show('Loading Adventures', 'Fetching your progress...');
   buildNav('adventures');
-
-  // FIX 2: always restore progress from server before rendering locks
   await QQ.restoreSession();
-
   renderAll();
+  PageLoader.hide();
 
   const params = new URLSearchParams(window.location.search);
   const mode = params.get('mode');
