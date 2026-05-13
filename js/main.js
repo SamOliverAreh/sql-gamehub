@@ -185,10 +185,16 @@ async function login(username, password) {
 }
 
 async function logout() {
+  // Block page immediately — no interaction during logout
+  if (typeof PageLoader !== 'undefined') {
+    PageLoader.show('Logging Out', 'Ending your session...');
+  }
+  const inPages = window.location.pathname.includes('/pages/');
+  const loginURL = inPages ? 'login.html' : 'pages/login.html';
+
   if (isAnonymous()) {
     clearAnonymous();
-    const inPages = window.location.pathname.includes('/pages/');
-    window.location.href = inPages ? '../index.html' : 'index.html';
+    window.location.href = loginURL;
     return;
   }
   const token = localStorage.getItem('qq_token');
@@ -196,8 +202,7 @@ async function logout() {
   localStorage.removeItem('qq_token');
   localStorage.removeItem('qq_user');
   localStorage.removeItem('qq_progress');
-  const inPages = window.location.pathname.includes('/pages/');
-  window.location.href = inPages ? '../index.html' : 'index.html';
+  window.location.href = loginURL;
 }
 
 // Restore session on page load (refresh user data from server)
