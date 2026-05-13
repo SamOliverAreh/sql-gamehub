@@ -14,7 +14,6 @@
     .auth-sub { color:var(--text-muted); font-size:0.84rem; margin-bottom:28px; }
     .auth-switch { text-align:center; margin-top:20px; color:var(--text-muted); font-size:0.84rem; }
     .auth-switch a { color:var(--accent); text-decoration:none; }
-    .btn-loading { opacity:0.7; pointer-events:none; }
     @media(max-width:480px){ .auth-card { padding:28px 18px; } }
   </style>
 </head>
@@ -36,65 +35,65 @@
 
   <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);text-align:center;">
     <p style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-dim);margin-bottom:12px;">JUST EXPLORING?</p>
-    <button onclick="playAsGuest()" class="btn-ghost" style="width:100%;justify-content:center;gap:8px;">
-      👤 Play as Guest
-    </button>
-    <p style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-dim);margin-top:8px;line-height:1.6;">
-      Full access, no account needed. Progress lost on tab close.
-    </p>
+    <button onclick="playAsGuest()" class="btn-ghost" style="width:100%;justify-content:center;gap:8px;">👤 Play as Guest</button>
+    <p style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-dim);margin-top:8px;line-height:1.6;">Full access, no account needed. Progress lost on tab close.</p>
   </div>
 </div>
 
+<script src="../js/page-loader.js"></script>
 <script src="../js/main.js"></script>
 <script src="../js/nav-inject.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   buildNav('');
-  // If already has valid token, restore and redirect
+  if (sessionStorage.getItem('qq_just_registered')) {
+    sessionStorage.removeItem('qq_just_registered');
+    return;
+  }
   const token = localStorage.getItem('qq_token');
-  if (token) {
-    QQ.restoreSession().then(user => {
-      if (user) window.location.href = 'dashboard.html';
-    });
+  if (token && !QQ.isAnonymous()) {
+    PageLoader.show('Checking session...', 'Verifying your account');
+    const user = await QQ.restoreSession();
+    PageLoader.hide();
+    if (user) window.location.href = 'dashboard.html';
   }
 });
+
 function showAlert(msg, type='error') {
   document.getElementById('alertBox').innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
 }
+
 async function handleLogin() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   if (!username || !password) return showAlert('Please fill in all fields.');
-  const btn = document.getElementById('loginBtn');
+
   const wasGuest = QQ.isAnonymous();
-  btn.textContent = wasGuest ? 'Logging in & saving progress...' : 'Logging in...';
-  btn.classList.add('btn-loading');
+  PageLoader.show(
+    wasGuest ? 'Logging In & Saving Progress' : 'Logging In',
+    wasGuest ? 'Transferring your guest progress...' : 'Authenticating with the server...'
+  );
+
   const r = await QQ.login(username, password);
-  btn.textContent = 'Login →'; btn.classList.remove('btn-loading');
-  if (!r.ok) return showAlert(r.error || 'Login failed.');
-  if (wasGuest) {
-    showAlert('Logged in! Your guest progress has been saved to your account.', 'success');
-  } else {
-    showAlert('Login successful! Redirecting...', 'success');
+
+  if (!r.ok) {
+    PageLoader.hide();
+    return showAlert(r.error || 'Login failed.');
   }
-  setTimeout(() => window.location.href = 'dashboard.html', 1000);
+
+  PageLoader.progress(100, wasGuest ? 'Progress saved! Redirecting...' : 'Login successful! Redirecting...');
+  await new Promise(res => setTimeout(res, 700));
+  window.location.href = 'dashboard.html';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
 
 function playAsGuest() {
-  if (!confirm(
-    '⚠️ Guest Mode Notice\n\n' +
-    '• Full access to all challenges and adventures\n' +
-    '• XP, tier unlocks and progress work normally\n' +
-    '• Your progress is NOT saved to any database\n' +
-    '• Progress will be lost when you close this tab\n\n' +
-    'No personal data is collected in guest mode.\n\n' +
-    'Continue as guest?'
-  )) return;
+  if (!confirm('⚠️ Guest Mode Notice\n\n• Full access to all challenges and adventures\n• XP, tier unlocks and progress work normally\n• Your progress is NOT saved to any database\n• Progress will be lost when you close this tab\n\nNo personal data is collected in guest mode.\n\nContinue as guest?')) return;
   const user = QQ.startAnonymous();
   showAlert('Welcome, ' + user.username + '! Playing as guest.', 'success');
   setTimeout(() => window.location.href = 'challenges.html', 1000);
 }
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
 </script>
 </body>
 </html>
