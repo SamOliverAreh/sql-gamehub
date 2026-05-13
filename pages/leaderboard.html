@@ -54,13 +54,14 @@
   <div class="footer-links"><a href="challenges.html">Challenges</a><a href="adventures.html">Adventures</a></div>
 </footer>
 
+<script src="../js/page-loader.js"></script>
 <script src="../js/main.js"></script>
 <script src="../js/nav-inject.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   buildNav('leaderboard');
-  // FIX 1: fetch live leaderboard from server — same data source as dashboard rank
-  QQ.fetchLeaderboard().then(() => render());
+  PageLoader.show('Loading Leaderboard', 'Fetching live rankings...');
+  QQ.fetchLeaderboard().then(() => { render(); PageLoader.hide(); });
 });
 function render() {
   const user = QQ.getUser();
