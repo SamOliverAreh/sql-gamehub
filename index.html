@@ -97,7 +97,7 @@
 
 <footer class="footer">
   <div class="footer-logo">⬡ QueryQuest</div>
-  <p class="footer-sub">Built by <b>Sam Oliver Areh </b> · SQL portfolio project · Showcasing real-world data skills</p>
+  <p class="footer-sub">Built by <b>Sam Oliver Areh</b> · SQL portfolio project · Showcasing real-world data skills</p>
   <div class="footer-links">
     <a href="https://github.com" target="_blank">GitHub</a>
     <a href="pages/about.html">About</a>
@@ -160,6 +160,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div class="level-tags">${tier.tags.map(t => '<span>' + t + '</span>').join('')}</div>
       <div class="level-xp">${tier.xpLabel} per solve</div>
     `;
+
+    // Click handler: unlocked → go to challenges filtered by tier; locked → explain
+    if (isUnlocked) {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => {
+        window.location.href = 'pages/challenges.html?level=' + tier.id;
+      });
+    } else {
+      card.style.cursor = 'not-allowed';
+      card.addEventListener('click', () => {
+        alert('🔒 ' + tier.name + ' tier is locked.\nComplete all ' + (tier.prev || 'previous') + ' challenges first to unlock it.');
+      });
+    }
+
     container.appendChild(card);
   });
 });
